@@ -2,6 +2,10 @@
 
 Very small static site generator that only generate a single page type for you.
 
+It currently support basic folder structures, but there is no way to navigate between pages yet.
+
+The CSS is also not applying when a post is in a nested folder.
+
 I have no idea how fast it is, and that is none of my concern, but it's probably not bad.
 
 ## Usage
@@ -12,7 +16,9 @@ All the files starting with `.` will not be generated, so you can use that to ma
 
 ## Styling
 
-You can theme however you want in the `style.index.css`
+The theme is gruvbox-like, because I love gruvbox.
+
+You can customize everything in the `style/main.css` to make your own style
 
 ## Templates
 

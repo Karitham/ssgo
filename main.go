@@ -9,7 +9,10 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/alecthomas/chroma/formatters/html"
+	mathjax "github.com/litao91/goldmark-mathjax"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting"
 )
 
 var (
@@ -38,14 +41,26 @@ func main() {
 		log.Println(err)
 	}
 
+	md := goldmark.New(
+		goldmark.WithExtensions(mathjax.MathJax),
+		goldmark.WithExtensions(
+			highlighting.NewHighlighting(
+				highlighting.WithStyle("native"),
+				highlighting.WithFormatOptions(
+					html.WithClasses(true),
+				),
+			),
+		),
+	)
+
 	for _, post := range posts {
 		var buf bytes.Buffer
-		md, err := ioutil.ReadFile(post)
+		filecontent, err := ioutil.ReadFile(post)
 		if err != nil {
 			log.Println(err)
 		}
 
-		if err := goldmark.Convert(md, &buf); err != nil {
+		if err := md.Convert(filecontent, &buf); err != nil {
 			log.Println(err)
 		}
 
@@ -56,7 +71,15 @@ func main() {
 
 		postName := getFileName(post)
 
-		t.Execute(f, Index{PageTitle: postName[:len(postName)-len(filepath.Ext(postName))], Body: string(buf.Bytes())})
+		err = t.Execute(f,
+			Index{
+				PageTitle: postName[:len(postName)-len(filepath.Ext(postName))],
+				Body:      buf.String(),
+			},
+		)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
