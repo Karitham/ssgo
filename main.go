@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	// ProdDir is where the result will end up
-	ProdDir = "public"
+	// PublDir is where the result will end up
+	PublDir = "public"
 	// TemplateDir is where the templates are located
 	TemplateDir = "templates"
 	// PostDir is where the markdown posts are located
@@ -23,7 +23,8 @@ var (
 
 // Index represent the templated file
 type Index struct {
-	Body string
+	PageTitle string
+	Body      string
 }
 
 func main() {
@@ -45,15 +46,17 @@ func main() {
 		}
 
 		if err := goldmark.Convert(md, &buf); err != nil {
-			panic(err)
+			log.Println(err)
 		}
 
-		f, err := createHTMLPost(ProdDir, post)
+		f, err := CreateHTMLFile(PublDir, PostDir, post)
 		if err != nil {
 			log.Println(err)
 		}
 
-		t.Execute(f, Index{Body: string(buf.Bytes())})
+		postName := getFileName(post)
+
+		t.Execute(f, Index{PageTitle: postName[:len(postName)-len(filepath.Ext(postName))], Body: string(buf.Bytes())})
 	}
 }
 
@@ -61,24 +64,36 @@ func trimDir(path, dir string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(path, dir), string(filepath.Separator))
 }
 
+func trimFilename(path string) string {
+	splittedPath := strings.Split(path, string(filepath.Separator))
+	return strings.TrimSuffix(path, splittedPath[len(splittedPath)-1])
+}
+
+func getFileName(path string) string {
+	return string(path[len(trimFilename(path)):])
+}
+
 // ConvertExt changes a file's extension to the given ext, for example "opus".
 func ConvertExt(file string, ext string) string {
 	return file[:len(file)-len(filepath.Ext(file))] + "." + ext
 }
 
-func createHTMLPost(publDir string, fp string) (files *os.File, err error) {
-	var publpath = ConvertExt(filepath.Join(publDir, trimDir(fp, PostDir)), "html")
+// CreateHTMLFile create an html file in the publDir that has the same path and name as the filepath input
+func CreateHTMLFile(publDir, postDir, filePath string) (file *os.File, err error) {
+	// Convert the `.md` file to a `html` and change the directory
+	var publpath = ConvertExt(filepath.Join(publDir, trimDir(filePath, postDir)), "html")
 
-	if _, err := os.Stat(publDir); os.IsNotExist(err) {
-		os.Mkdir(publDir, 0755)
-	}
+	// Get the final directory path
+	dir := filepath.Join(publDir, trimDir(trimFilename(filePath), postDir))
 
-	f, err := os.Create(publpath)
+	// Make the final directory if it doesn't exist
+	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		return nil, err
 	}
 
-	return f, nil
+	// Create the file
+	return os.Create(publpath)
 }
 
 func listFiles(dir string) (files []string, err error) {
