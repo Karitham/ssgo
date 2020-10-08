@@ -1,0 +1,50 @@
+body {
+    font-family: "Fira Code";
+    max-width: 50rem;
+    padding: 2rem;
+    margin: auto;
+}
+
+@media only screen and (max-device-width: 736px) {
+    main {
+        padding: 0rem;
+    }
+}
+
+img {
+    max-width: 50em;
+}
+
+::selection {
+    background: #d3869b;
+}
+
+body {
+    background: #282828;
+    color: #ebdbb2;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: "Jetbrains Mono";
+    margin-bottom: 0.1rem;
+    color: #fbf1c7;
+}
+
+a {
+    color: #ebdbb2;
+    text-decoration: underline;
+}
+
+blockquote {
+    border-left: 1px solid #bdae93;
+    margin: 0.5em 10px;
+    padding: 0.5em 10px;
+}
+
+math {
+    text-align: left;
+}
