@@ -4,8 +4,6 @@ Very small static site generator that only generate a single page type for you.
 
 It currently support basic folder structures, but there is no way to navigate between pages yet.
 
-The CSS is also not applying when a post is in a nested folder.
-
 I have no idea how fast it is, and that is none of my concern, but it's probably not bad.
 
 ## Usage

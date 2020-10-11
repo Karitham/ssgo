@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/style/index.css" />
+</head>
+
+<body>
+    Navigation:
+    <ul>
+        {{range .FileTree}}
+
+        <li><a href="{{.}}">{{.}}</a></li>
+
+        {{end}}
+    </ul>
+</body>
+
+</html>

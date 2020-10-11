@@ -1,0 +1,49 @@
+/* color palette I'm using :
+https://github.com/morhetz/gruvbox
+*/
+
+:root {
+    --code-color: #282828;
+    --main-bg-color: #222222;
+    --body-color: #ebdbb2;
+    --title-color: #fbf1c7;
+    --title-font-family: "Fira Code";
+    --body-font-family: "Jetbrains Mono";
+    --body-max-width: 50rem;
+    --code-max-width: 40rem;
+}
+
+body {
+    font-family: var(--body-font-family);
+    max-width: var(--body-max-width);
+    padding: 2rem;
+    margin: auto;
+}
+
+img {
+    max-width: 50em;
+}
+
+body,
+a {
+    background: var(--main-bg-color);
+    color: var(--body-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: var(--body-font-family);
+    margin-bottom: 0.4rem;
+    color: var(--title-color);
+}
+
+h1 {
+    font-size: 3em;
+}
+
+::selection {
+    background-color: #91919165;
+}
