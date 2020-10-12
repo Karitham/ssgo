@@ -11,13 +11,9 @@
 </head>
 
 <body>
-    Navigation:
-    <ul>
-        {{range .FileTree}}
-
-        <li><a href="{{.}}">{{.}}</a></li>
-
-        {{end}}
+    <h1>Navigation:</h1>
+    <ul>{{range .FileTree}}
+    <li><a href="{{.}}">{{.}}</a></li>{{end}}
     </ul>
 </body>
 

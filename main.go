@@ -2,12 +2,12 @@ package main
 
 import (
 	"bytes"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/alecthomas/chroma/formatters/html"
 	mathjax "github.com/litao91/goldmark-mathjax"
@@ -75,7 +75,7 @@ func main() {
 			if err != nil {
 				log.Println(err)
 			}
-			break
+			continue
 		}
 
 		filecontent, err := ioutil.ReadFile(post)
