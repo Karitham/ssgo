@@ -67,7 +67,9 @@ func main() {
 				log.Println("createHTMLFile error main range posts: ", err)
 			}
 
-			err = t["index"].Execute(f,
+			err = t.ExecuteTemplate(
+				f,
+				"index.tmpl",
 				Index{
 					FileTree: posts,
 				},
@@ -96,7 +98,8 @@ func main() {
 
 		postName := GetFilename(TrimFileExt(post))
 
-		err = t["post"].Execute(f,
+		err = t.ExecuteTemplate(f,
+			"post.tmpl",
 			Post{
 				PageTitle: postName,
 				Body:      buf.String(),
@@ -108,7 +111,8 @@ func main() {
 	}
 }
 
-func trimDir(path, dir string) string {
+// TrimDir trims the directory of the given path
+func TrimDir(path, dir string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(path, dir), string(filepath.Separator))
 }
 
@@ -136,10 +140,10 @@ func ConvertExt(file string, ext string) string {
 // CreateHTMLFile create an html file in the publDir that has the same path and name as the filepath input
 func CreateHTMLFile(publDir, postDir, filePath string) (file *os.File, err error) {
 	// Convert the `.md` file to a `html` and change the directory
-	var publpath = ConvertExt(filepath.Join(publDir, trimDir(filePath, postDir)), "html")
+	var publpath = ConvertExt(filepath.Join(publDir, TrimDir(filePath, postDir)), "html")
 
 	// Get the final directory path
-	dir := filepath.Join(publDir, trimDir(trimFilename(filePath), postDir))
+	dir := filepath.Join(publDir, TrimDir(trimFilename(filePath), postDir))
 
 	// Make the final directory if it doesn't exist
 	err = os.MkdirAll(dir, 0755)
@@ -151,20 +155,20 @@ func CreateHTMLFile(publDir, postDir, filePath string) (file *os.File, err error
 	return os.Create(publpath)
 }
 
-// ListFiles list all files in a directory and the subdirectory. Returns relative path of all files except those starting with a `.`
+// ListFiles list all files in a directory and subdirectories. Returns relative path of all files except those starting with a `.`
 func ListFiles(dir string, withDir bool) (files []string, err error) {
-	return files, filepath.Walk(
-		dir,
+	return files, filepath.Walk(dir,
+
+		// Walk the file tree while getting both files and directories
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			if strings.HasPrefix(info.Name(), ".") {
+
+			if (!withDir && info.IsDir()) || strings.HasPrefix(info.Name(), ".") {
 				return nil
 			}
-			if !withDir && info.IsDir() {
-				return nil
-			}
+
 			files = append(files, path)
 			return nil
 		},
@@ -172,22 +176,12 @@ func ListFiles(dir string, withDir bool) (files []string, err error) {
 }
 
 // ParseTemplates is used to parse all the templates inside the given directory
-func ParseTemplates(TemplateDir string) (tpls map[string]*template.Template, err error) {
-	tpls = make(map[string]*template.Template)
-
+func ParseTemplates(TemplateDir string) (tpl *template.Template, err error) {
 	templates, err := ListFiles(TemplateDir, false)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	for _, t := range templates {
-		tpl, err := template.ParseFiles(t)
-		if err != nil {
-			log.Println(err)
-		}
-		tpls[TrimFileExt(GetFilename(t))] = tpl
-	}
-
-	return tpls, nil
+	return template.ParseFiles(templates...)
 }
