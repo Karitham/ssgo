@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,13 +27,31 @@ var (
 
 // Post represent the templated file
 type Post struct {
+	MenuItems NavMenuItems
 	PageTitle string
 	Body      string
 }
 
-// Index represent the templated file
+// NavMenuItems represent an all menu items
+type NavMenuItems struct {
+	MenuItems []MenuItem `json:"menu-items"`
+}
+
+// MenuItem is an item node
+type MenuItem struct {
+	Title string `json:"title"`
+	URL   string `json:"URL"`
+}
+
+// Index represent the templated Index file
 type Index struct {
-	FileTree []string
+	MenuItems NavMenuItems
+	FileTree  []IndexTree
+}
+
+type IndexTree struct {
+	FileURL   string
+	FileTitle string
 }
 
 func main() {
@@ -50,13 +69,15 @@ func main() {
 		goldmark.WithExtensions(mathjax.MathJax),
 		goldmark.WithExtensions(
 			highlighting.NewHighlighting(
-				highlighting.WithStyle("native"),
-				highlighting.WithFormatOptions(
-					html.WithClasses(true),
-				),
+				highlighting.WithFormatOptions(html.WithClasses(true)),
 			),
 		),
 	)
+
+	items, err := getNavMenuItems("menu.json")
+	if err != nil {
+		log.Println(err)
+	}
 
 	for _, post := range posts {
 
@@ -67,11 +88,26 @@ func main() {
 				log.Println("createHTMLFile error main range posts: ", err)
 			}
 
+			files, err := ioutil.ReadDir(trimFilename(f.Name()))
+
 			err = t.ExecuteTemplate(
 				f,
 				"index.tmpl",
 				Index{
-					FileTree: posts,
+					MenuItems: items,
+					FileTree: func(f []os.FileInfo) (tree []IndexTree) {
+						for _, file := range f {
+							fn := file.Name()
+							if fn == "index.html" {
+								continue
+							}
+							tree = append(tree, IndexTree{
+								FileTitle: strings.ToUpper(TrimFileExt(fn)),
+								FileURL:   fn,
+							})
+						}
+						return
+					}(files),
 				},
 			)
 			if err != nil {
@@ -101,6 +137,7 @@ func main() {
 		err = t.ExecuteTemplate(f,
 			"post.tmpl",
 			Post{
+				MenuItems: items,
 				PageTitle: postName,
 				Body:      buf.String(),
 			},
@@ -185,3 +222,25 @@ func ParseTemplates(TemplateDir string) (tpl *template.Template, err error) {
 
 	return template.ParseFiles(templates...)
 }
+
+func getNavMenuItems(file string) (Items NavMenuItems, err error) {
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		return Items, err
+	}
+
+	return Items, json.Unmarshal(f, &Items)
+}
+
+// // ListFilesInDir list the files in a directory and return the name of each
+// func ListFilesInDir(dir string) (files []string, err error) {
+// 	f, err := ioutil.ReadDir(dir)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	for _, file := range f {
+// 		files = append(files, file.Name())
+// 	}
+// 	return
+// }

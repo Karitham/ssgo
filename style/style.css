@@ -1,7 +1,3 @@
-/* color palette I'm using :
-https://github.com/morhetz/gruvbox
-*/
-
 :root {
     --code-color: #282828;
     --main-bg-color: #222222;
@@ -15,19 +11,16 @@ https://github.com/morhetz/gruvbox
 
 body {
     font-family: var(--body-font-family);
+    background: var(--main-bg-color);
     max-width: var(--body-max-width);
+    color: var(--body-color);
     padding: 2rem;
     margin: auto;
+    padding-top: 4em;
 }
 
 img {
     max-width: 50em;
-}
-
-body,
-a {
-    background: var(--main-bg-color);
-    color: var(--body-color);
 }
 
 h1,
@@ -37,16 +30,51 @@ h4,
 h5 {
     font-family: var(--body-font-family);
     margin-bottom: 0.4rem;
-    color: var(--title-color);
+    color: #fabd2f;
+}
+a {
+    text-decoration: none;
+    color: #b8bb26;
 }
 
-h1 {
-    font-size: 3em;
+.body {
+    padding: 4%;
+    border-radius: 1em;
 }
 
 ::selection {
     background-color: #91919165;
 }
+
+/* Nav Bar  */
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+nav li {
+    float: left;
+}
+
+nav li a {
+    text-transform: uppercase;
+    display: block;
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+/* End of the nav bar */
 
 /* Code highlighting */
 .chroma {

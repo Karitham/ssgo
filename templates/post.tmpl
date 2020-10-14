@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>{{.PageTitle}}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-        ></script>
-        <link
-            rel="stylesheet"
-            type="text/css"
-            media="screen"
-            href="/style/post.css"
-        />
-    </head>
-    <body>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.PageTitle}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/style/style.css" />
+</head>
+
+<body>
+    <nav>
+        <div class="menu">
+            <ul>{{range .MenuItems.MenuItems}}
+                <li><a href="{{.URL}}" class="menu-item">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
+    </nav>
+    <div class="body">
         {{.Body}}
-    </body>
+    </div>
+</body>
+
 </html>

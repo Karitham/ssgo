@@ -1,16 +1,25 @@
-# SSGO
+# SSGO - HEAVILY WIP
 
-Very small static site generator that only generate a single page type for you.
+Very small static site generator.
 
 It currently support basic folder structures, but there is no way to navigate between pages yet.
 
-I have no idea how fast it is, and that is none of my concern, but it's probably not bad.
+I have no idea how fast it is, but it's probably not bad.
 
 ## Usage
 
 Write a mardkwon post in `posts`
 
 All the files starting with `.` will not be generated, so you can use that to make drafts
+
+You can add items to the `menu.json` file to add menu entries, add nodes like so
+
+```json
+    {
+        "title": "Home", // will be displayed as a nav entry
+        "URL": "/public" // The directory / file to point to
+    }
+```
 
 ## Styling
 

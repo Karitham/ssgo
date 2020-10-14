@@ -4,17 +4,26 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Page Title</title>
+    <title>Index</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <link rel="stylesheet" type="text/css" media="screen" href="/style/index.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/style/style.css" />
 </head>
 
 <body>
-    <h1>Navigation:</h1>
-    <ul>{{range .FileTree}}
-    <li><a href="{{.}}">{{.}}</a></li>{{end}}
-    </ul>
+    <nav>
+        <div class="menu">
+            <ul>{{range .MenuItems.MenuItems}}
+                <li><a href="{{.URL}}" class="menu-item">{{.Title}}</a></li>{{end}}
+            </ul>
+        </div>
+    </nav>
+    <div class="body">
+        <h1>Navigation:</h1>
+        <ul>{{range .FileTree}}
+            <li><a href="{{.FileURL}}">{{.FileTitle}}</a></li>{{end}}
+        </ul>
+    </div>
 </body>
 
 </html>

@@ -1,0 +1,8 @@
+{
+    "menu-items": [
+        {
+            "title": "Home",
+            "URL": "/public"
+        }
+    ]
+}
