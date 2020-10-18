@@ -15,6 +15,7 @@ body {
     max-width: var(--body-max-width);
     color: var(--body-color);
     padding: 2rem;
+    text-align: justify;
     margin: auto;
     padding-top: 4em;
 }
@@ -37,44 +38,9 @@ a {
     color: #b8bb26;
 }
 
-.body {
-    padding: 4%;
-    border-radius: 1em;
-}
-
 ::selection {
     background-color: #91919165;
 }
-
-/* Nav Bar  */
-
-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-}
-
-nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #333;
-}
-
-nav li {
-    float: left;
-}
-
-nav li a {
-    text-transform: uppercase;
-    display: block;
-    color: white;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-/* End of the nav bar */
 
 /* Code highlighting */
 .chroma {
@@ -82,7 +48,7 @@ nav li a {
     background-color: var(--code-color);
     max-width: var(--code-max-width);
     padding: 1ch 1em;
-    border-radius: 2%;
+    border-radius: 0.4em;
 }
 
 .kd,

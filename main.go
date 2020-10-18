@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,14 +26,8 @@ var (
 
 // Post represent the templated file
 type Post struct {
-	MenuItems NavMenuItems
 	PageTitle string
 	Body      string
-}
-
-// NavMenuItems represent an all menu items
-type NavMenuItems struct {
-	MenuItems []MenuItem `json:"menu-items"`
 }
 
 // MenuItem is an item node
@@ -45,10 +38,10 @@ type MenuItem struct {
 
 // Index represent the templated Index file
 type Index struct {
-	MenuItems NavMenuItems
-	FileTree  []IndexTree
+	FileTree []IndexTree
 }
 
+// IndexTree represent each file present in the current directory by it's URL and name
 type IndexTree struct {
 	FileURL   string
 	FileTitle string
@@ -74,55 +67,15 @@ func main() {
 		),
 	)
 
-	items, err := getNavMenuItems("menu.json")
-	if err != nil {
-		log.Println(err)
-	}
-
+	// used later for making index files
+	var directories []string
 	for _, post := range posts {
-
-		// Used to make index files
 		if file, err := os.Lstat(post); err == nil && file.IsDir() {
-			f, err := CreateHTMLFile(PublDir, PostDir, post+string(filepath.Separator)+"index")
-			if err != nil {
-				log.Println("createHTMLFile error main range posts: ", err)
-			}
-
-			files, err := ioutil.ReadDir(trimFilename(f.Name()))
-
-			err = t.ExecuteTemplate(
-				f,
-				"index.tmpl",
-				Index{
-					MenuItems: items,
-					FileTree: func(f []os.FileInfo) (tree []IndexTree) {
-						for _, file := range f {
-							fn := file.Name()
-							if fn == "index.html" {
-								continue
-							}
-							tree = append(tree, IndexTree{
-								FileTitle: strings.ToUpper(TrimFileExt(fn)),
-								FileURL:   fn,
-							})
-						}
-						return
-					}(files),
-				},
-			)
-			if err != nil {
-				log.Println(err)
-			}
+			directories = append(directories, post)
 			continue
 		}
 
 		filecontent, err := ioutil.ReadFile(post)
-		if err != nil {
-			log.Println(err)
-		}
-
-		// Create a corresponding HTML file
-		f, err := CreateHTMLFile(PublDir, PostDir, post)
 		if err != nil {
 			log.Println(err)
 		}
@@ -132,19 +85,14 @@ func main() {
 			log.Println(err)
 		}
 
-		postName := GetFilename(TrimFileExt(post))
-
-		err = t.ExecuteTemplate(f,
-			"post.tmpl",
-			Post{
-				MenuItems: items,
-				PageTitle: postName,
-				Body:      buf.String(),
-			},
-		)
+		err = MakePost(post, buf.String(), t)
 		if err != nil {
 			log.Println(err)
 		}
+	}
+
+	for _, d := range directories {
+		CreateIndex(PublDir, PostDir, d, t)
 	}
 }
 
@@ -202,7 +150,7 @@ func ListFiles(dir string, withDir bool) (files []string, err error) {
 				return err
 			}
 
-			if (!withDir && info.IsDir()) || strings.HasPrefix(info.Name(), ".") {
+			if (!withDir && info.IsDir()) || strings.HasPrefix(info.Name(), "_") {
 				return nil
 			}
 
@@ -212,35 +160,63 @@ func ListFiles(dir string, withDir bool) (files []string, err error) {
 	)
 }
 
+// FileTree returns an IndexTree based on a fileInfo array
+func FileTree(f []os.FileInfo) (tree []IndexTree) {
+	for _, file := range f {
+		fn := file.Name()
+		if fn == "index.html" {
+			continue
+		}
+		tree = append(
+			tree,
+			IndexTree{
+				FileTitle: strings.ToUpper(TrimFileExt(fn)),
+				FileURL:   fn,
+			},
+		)
+	}
+	return
+}
+
+// CreateIndex creates an index file in every directory, made for navigation purposes
+func CreateIndex(PublDir, PostDir, directory string, t *template.Template) error {
+	f, err := CreateHTMLFile(PublDir, PostDir, directory+string(filepath.Separator)+"index")
+	if err != nil {
+		return err
+	}
+
+	files, err := ioutil.ReadDir(trimFilename(f.Name()))
+	if err != nil {
+		return err
+	}
+
+	return t.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files)})
+}
+
+// MakePost is used to make a post
+func MakePost(post, body string, t *template.Template) error {
+	f, err := CreateHTMLFile(PublDir, PostDir, post)
+	if err != nil {
+		return err
+	}
+
+	postName := GetFilename(TrimFileExt(post))
+
+	return t.ExecuteTemplate(f,
+		"post.tmpl",
+		Post{
+			PageTitle: postName,
+			Body:      body,
+		},
+	)
+}
+
 // ParseTemplates is used to parse all the templates inside the given directory
 func ParseTemplates(TemplateDir string) (tpl *template.Template, err error) {
 	templates, err := ListFiles(TemplateDir, false)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	return template.ParseFiles(templates...)
 }
-
-func getNavMenuItems(file string) (Items NavMenuItems, err error) {
-	f, err := ioutil.ReadFile(file)
-	if err != nil {
-		return Items, err
-	}
-
-	return Items, json.Unmarshal(f, &Items)
-}
-
-// // ListFilesInDir list the files in a directory and return the name of each
-// func ListFilesInDir(dir string) (files []string, err error) {
-// 	f, err := ioutil.ReadDir(dir)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	for _, file := range f {
-// 		files = append(files, file.Name())
-// 	}
-// 	return
-// }

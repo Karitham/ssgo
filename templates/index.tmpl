@@ -11,13 +11,6 @@
 </head>
 
 <body>
-    <nav>
-        <div class="menu">
-            <ul>{{range .MenuItems.MenuItems}}
-                <li><a href="{{.URL}}" class="menu-item">{{.Title}}</a></li>{{end}}
-            </ul>
-        </div>
-    </nav>
     <div class="body">
         <h1>Navigation:</h1>
         <ul>{{range .FileTree}}
