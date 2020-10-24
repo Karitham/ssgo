@@ -1,0 +1,89 @@
+$code-color: #272727
+$main-bg-color: #1f1f1f
+$quote-color: #242424
+$body-color: #ebdbb2
+$title-color: #fbf1c7
+$title-font-family: "Fira Code"
+$body-font-family: "Jetbrains Mono"
+$body-max-width: 40rem
+$code-max-width: 40rem
+
+html
+    background: $main-bg-color
+    height: 100%
+    font-family: $body-color
+    color: $body-color
+
+.body
+    max-width: $body-max-width
+    font-family: $body-font-family
+    margin: 0 auto
+    padding-top: 1em
+    text-align: justify
+
+img
+    max-width: 50rem
+
+h1,
+h2,
+h3,
+h4,
+h5
+    font-family: $title-font-family
+    margin-bottom: 0.4rem
+    color: #fabd2f
+
+a
+    text-decoration: none
+    color: #e2e2e2
+
+blockquote
+    background-color: $quote-color
+    border-radius: 0.2em
+    text-align: justify
+    margin: 0.1rem
+    padding: 0.4rem 1.2rem 0.4rem 1.2rem
+
+::selection
+    background-color: #91919165
+
+.index
+    text-align: center
+    margin: 0 0
+    padding: 25% 0
+    font-size: 5ch
+
+.index a
+    color: #fabd295
+
+.index li
+    display: inline-block
+    list-style-type: none
+
+/* Code highlighting */
+.chroma,
+pre
+    font-family: $body-font-family
+    background-color: $code-color
+    max-width: $code-max-width
+    padding: 1.4rem
+    margin: 0.8rem 0
+    border-radius: 0.2em
+
+.kd,
+.kn
+    color: #fb482f
+
+.s
+    color: #b8bb26
+
+.nf
+    color: #83a598
+
+.kc
+    color: #d3869b
+
+.kt
+    color: #fabd2f
+
+/* End of the code highlighting */

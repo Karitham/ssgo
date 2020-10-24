@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/alecthomas/chroma/formatters/html"
@@ -28,12 +29,6 @@ var (
 type Post struct {
 	PageTitle string
 	Body      string
-}
-
-// MenuItem is an item node
-type MenuItem struct {
-	Title string `json:"title"`
-	URL   string `json:"URL"`
 }
 
 // Index represent the templated Index file
@@ -69,30 +64,58 @@ func main() {
 
 	// used later for making index files
 	var directories []string
+	var wg sync.WaitGroup
+
 	for _, post := range posts {
 		if file, err := os.Lstat(post); err == nil && file.IsDir() {
 			directories = append(directories, post)
 			continue
 		}
-
-		filecontent, err := ioutil.ReadFile(post)
-		if err != nil {
-			log.Println(err)
-		}
-
-		var buf bytes.Buffer
-		if err := md.Convert(filecontent, &buf); err != nil {
-			log.Println(err)
-		}
-
-		err = MakePost(post, buf.String(), t)
-		if err != nil {
-			log.Println(err)
-		}
+		wg.Add(1)
+		go MakePost(post, t, &md, &wg)
 	}
 
+	wg.Wait()
 	for _, d := range directories {
-		CreateIndex(PublDir, PostDir, d, t)
+		err := CreateIndex(PublDir, PostDir, d, t)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
+
+// MakePost makes a post and inserts the content
+func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	filecontent, err := ioutil.ReadFile(post)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var buf bytes.Buffer
+	if err := (*md).Convert(filecontent, &buf); err != nil {
+		log.Println(err)
+	}
+
+	f, err := CreateHTMLFile(&PublDir, &PostDir, &post)
+	if err != nil {
+		log.Println(err)
+	}
+
+	postName := GetFilename(TrimFileExt(post))
+
+	t.ExecuteTemplate(f,
+		"post.tmpl",
+		Post{
+			PageTitle: postName,
+			Body:      buf.String(),
+		},
+	)
+
+	err = f.Close()
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -123,12 +146,12 @@ func ConvertExt(file string, ext string) string {
 }
 
 // CreateHTMLFile create an html file in the publDir that has the same path and name as the filepath input
-func CreateHTMLFile(publDir, postDir, filePath string) (file *os.File, err error) {
+func CreateHTMLFile(publDir, postDir, filePath *string) (file *os.File, err error) {
 	// Convert the `.md` file to a `html` and change the directory
-	var publpath = ConvertExt(filepath.Join(publDir, TrimDir(filePath, postDir)), "html")
+	var publpath = ConvertExt(filepath.Join(*publDir, TrimDir(*filePath, *postDir)), "html")
 
 	// Get the final directory path
-	dir := filepath.Join(publDir, TrimDir(trimFilename(filePath), postDir))
+	dir := filepath.Join(*publDir, TrimDir(trimFilename(*filePath), *postDir))
 
 	// Make the final directory if it doesn't exist
 	err = os.MkdirAll(dir, 0755)
@@ -180,7 +203,8 @@ func FileTree(f []os.FileInfo) (tree []IndexTree) {
 
 // CreateIndex creates an index file in every directory, made for navigation purposes
 func CreateIndex(PublDir, PostDir, directory string, t *template.Template) error {
-	f, err := CreateHTMLFile(PublDir, PostDir, directory+string(filepath.Separator)+"index")
+	filename := (directory + string(filepath.Separator) + "index")
+	f, err := CreateHTMLFile(&PublDir, &PostDir, &filename)
 	if err != nil {
 		return err
 	}
@@ -191,24 +215,6 @@ func CreateIndex(PublDir, PostDir, directory string, t *template.Template) error
 	}
 
 	return t.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files)})
-}
-
-// MakePost is used to make a post
-func MakePost(post, body string, t *template.Template) error {
-	f, err := CreateHTMLFile(PublDir, PostDir, post)
-	if err != nil {
-		return err
-	}
-
-	postName := GetFilename(TrimFileExt(post))
-
-	return t.ExecuteTemplate(f,
-		"post.tmpl",
-		Post{
-			PageTitle: postName,
-			Body:      body,
-		},
-	)
 }
 
 // ParseTemplates is used to parse all the templates inside the given directory
