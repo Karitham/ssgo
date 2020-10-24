@@ -16,11 +16,11 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting"
 )
 
-var (
+const (
 	// PublDir is where the result will end up
 	PublDir = "public"
 	// TemplateDir is where the templates are located
-	TemplateDir = "templates"
+	TemplateDir = "assets/templates"
 	// PostDir is where the markdown posts are located
 	PostDir = "posts"
 )
@@ -62,10 +62,13 @@ func main() {
 		),
 	)
 
-	// used later for making index files
-	var directories []string
+	// wg waits for the goroutine to finish making all the files
+	// before making the navigation menu
 	var wg sync.WaitGroup
+	// used for making index files
+	var directories []string
 
+	// make each post
 	for _, post := range posts {
 		if file, err := os.Lstat(post); err == nil && file.IsDir() {
 			directories = append(directories, post)
@@ -76,6 +79,8 @@ func main() {
 	}
 
 	wg.Wait()
+
+	// make index files
 	for _, d := range directories {
 		err := CreateIndex(PublDir, PostDir, d, t)
 		if err != nil {
@@ -98,20 +103,23 @@ func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync
 		log.Println(err)
 	}
 
-	f, err := CreateHTMLFile(&PublDir, &PostDir, &post)
+	f, err := CreateHTMLFile(PublDir, PostDir, &post)
 	if err != nil {
 		log.Println(err)
 	}
 
 	postName := GetFilename(TrimFileExt(post))
 
-	t.ExecuteTemplate(f,
+	err = t.ExecuteTemplate(f,
 		"post.tmpl",
 		Post{
 			PageTitle: postName,
 			Body:      buf.String(),
 		},
 	)
+	if err != nil {
+		log.Println(err)
+	}
 
 	err = f.Close()
 	if err != nil {
@@ -146,12 +154,12 @@ func ConvertExt(file string, ext string) string {
 }
 
 // CreateHTMLFile create an html file in the publDir that has the same path and name as the filepath input
-func CreateHTMLFile(publDir, postDir, filePath *string) (file *os.File, err error) {
+func CreateHTMLFile(publDir, postDir string, filePath *string) (file *os.File, err error) {
 	// Convert the `.md` file to a `html` and change the directory
-	var publpath = ConvertExt(filepath.Join(*publDir, TrimDir(*filePath, *postDir)), "html")
+	var publpath = ConvertExt(filepath.Join(publDir, TrimDir(*filePath, postDir)), "html")
 
 	// Get the final directory path
-	dir := filepath.Join(*publDir, TrimDir(trimFilename(*filePath), *postDir))
+	dir := filepath.Join(publDir, TrimDir(trimFilename(*filePath), postDir))
 
 	// Make the final directory if it doesn't exist
 	err = os.MkdirAll(dir, 0755)
@@ -204,7 +212,7 @@ func FileTree(f []os.FileInfo) (tree []IndexTree) {
 // CreateIndex creates an index file in every directory, made for navigation purposes
 func CreateIndex(PublDir, PostDir, directory string, t *template.Template) error {
 	filename := (directory + string(filepath.Separator) + "index")
-	f, err := CreateHTMLFile(&PublDir, &PostDir, &filename)
+	f, err := CreateHTMLFile(PublDir, PostDir, &filename)
 	if err != nil {
 		return err
 	}
