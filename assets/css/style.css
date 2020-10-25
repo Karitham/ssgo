@@ -51,12 +51,12 @@ blockquote {
 .index {
   text-align: center;
   margin: 0 0;
-  padding: 25% 0;
+  padding: 20% 0;
   font-size: 5ch;
 }
 
 .index a {
-  color: #fabd295;
+  color: #ffe75e;
 }
 
 .index li {
@@ -64,7 +64,6 @@ blockquote {
   list-style-type: none;
 }
 
-/* Code highlighting */
 .chroma,
 pre {
   font-family: "Jetbrains Mono";
@@ -95,5 +94,3 @@ pre {
 .kt {
   color: #fabd2f;
 }
-
-/* End of the code highlighting */
