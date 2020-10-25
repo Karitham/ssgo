@@ -1,41 +1,30 @@
-# SSGO - HEAVILY WIP
+# SSGO - ⚠️HEAVILY WIP⚠️
 
 Very small static site generator.
 
-It currently support basic folder structures, but there is no way to navigate between pages yet.
-
-I have no idea how fast it is, but it's probably not bad.
+It currently support basic folder structures, but the navigation is clearly not optimal
 
 ## Usage
 
-Write a mardkwon post in `posts`
+Write a markdown post in `posts`
 
-All the files starting with `.` will not be generated, so you can use that to make drafts
-
-You can add items to the `menu.json` file to add menu entries, add nodes like so
-
-```json
-    {
-        "title": "Home", // will be displayed as a nav entry
-        "URL": "/public" // The directory / file to point to
-    }
-```
+All the files starting with `_` will not be generated, so you can use that to make drafts
 
 ## Styling
 
 The theme is gruvbox-like, because I love gruvbox.
 
-You can customize everything in the `style/main.css` to make your own style
+You can customize everything in the `assets/css/main.css` to make your own style
 
 ## Templates
 
-For now it only support a post template, I'll add something for index too
+For now it only support 2 templates and the code is not modular
 
 ## Dependencies
 
 [https://github.com/yuin/goldmark](https://github.com/yuin/goldmark)
 
-That's the markdown parser I am using, I may make a small one myself but this one looks super amazing
+[https://github.com/alecthomas/chroma](github.com/alecthomas/chroma)
 
 ## License
 
@@ -68,4 +57,4 @@ For more information, please refer to <http://unlicense.org/>
 
 ## Author
 
-Pierre Louis Pery
+PL "Karitham" Pery
