@@ -56,7 +56,7 @@ func liveReload(conf *config.General, directories ...string) {
 			select {
 			case event := <-watcher.Events:
 				lr.Reload(event.Name)
-				if strings.HasPrefix(event.Name, conf.Directories.PostDir) {
+				if strings.HasPrefix(event.Name, conf.Directories.PostDir) && !strings.HasPrefix(post.GetFilename(event.Name), "_") {
 					wg.Add(1)
 					post.MakePost(event.Name, &wg, conf)
 				}
