@@ -17,10 +17,6 @@ I am focusing on making the thing work right now, it is nowhere near usable in p
   * [Dependencies](#dependencies)
 * [License](#license)
 * [Author](#author)
-  [Templates](#templates)
-  [Dependencies](#dependencies)
-* [License](#license)
-* [Author](#author)
   
 # Use
 
