@@ -10,6 +10,7 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/Karitham/ssgo/pkg/config"
 	"github.com/alecthomas/chroma/formatters/html"
 	mathjax "github.com/litao91/goldmark-mathjax"
 	"github.com/yuin/goldmark"
@@ -37,18 +38,18 @@ type IndexTree struct {
 
 // Execute is used to run the whole post making process
 // TODO : Add more options to run and make it extensible
-func Execute(PostDir string, TemplateDir string, PublDir string, Script string, log *log.Logger) error {
-	posts, err := ListFiles(PostDir, true)
+func Execute(conf *config.General) error {
+	posts, err := ListFiles(conf.Directories.PostDir, true)
 	if err != nil {
 		return err
 	}
 
-	t, err := ParseTemplates(TemplateDir)
+	conf.Templates, err = ParseTemplates(conf.Directories.TemplateDir)
 	if err != nil {
 		return err
 	}
 
-	md := goldmark.New(
+	conf.Markdown = goldmark.New(
 		goldmark.WithExtensions(mathjax.MathJax),
 		goldmark.WithExtensions(
 			highlighting.NewHighlighting(
@@ -57,40 +58,43 @@ func Execute(PostDir string, TemplateDir string, PublDir string, Script string, 
 		),
 	)
 
+	// make each post
+	directories := makePosts(posts, conf)
+
+	// make index files
+	for _, d := range directories {
+		err := CreateIndex(conf, d)
+		if err != nil {
+			return err
+		}
+	}
+
+	conf.Log.Printf("Wrote %d files\n", len(posts)+len(directories))
+	return nil
+}
+
+func makePosts(posts []string, conf *config.General) []string {
 	// wg waits for the goroutine to finish making all the files
 	// before making the navigation menu
-	var wg sync.WaitGroup
-	// used for making index files
 	var directories []string
-
-	// make each post
+	var wg sync.WaitGroup
 	for _, p := range posts {
 		if file, err := os.Lstat(p); err == nil && file.IsDir() {
 			directories = append(directories, p)
 			continue
 		}
 		wg.Add(1)
-		go MakePost(p, t, &md, &wg, PublDir, PostDir, Script)
+		go MakePost(p, &wg, conf)
 	}
-
 	wg.Wait()
 
-	// make index files
-	for _, d := range directories {
-		err := CreateIndex(PublDir, PostDir, d, t, Script)
-		if err != nil {
-			return err
-		}
-	}
-
-	log.Printf("Wrote %d files\n", len(posts)+len(directories))
-	return nil
+	return directories
 }
 
 // MakePost makes a post and inserts the content
 // TODO : Simplify function signature
 // TODO : have the post making extensible via config or such
-func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync.WaitGroup, PublDir string, PostDir string, Script string) {
+func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 	defer wg.Done()
 
 	filecontent, err := ioutil.ReadFile(post)
@@ -99,21 +103,21 @@ func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync
 	}
 
 	var buf bytes.Buffer
-	if err := (*md).Convert(filecontent, &buf); err != nil {
+	if err := conf.Markdown.Convert(filecontent, &buf); err != nil {
 		log.Println(err)
 	}
 
-	f, err := CreateHTMLFile(PublDir, PostDir, &post)
+	f, err := CreateHTMLFile(conf.Directories.PublDir, conf.Directories.PostDir, &post)
 	if err != nil {
 		log.Println(err)
 	}
 
 	postName := GetFilename(TrimFileExt(post))
 
-	err = t.ExecuteTemplate(f,
+	err = conf.Templates.ExecuteTemplate(f,
 		"post.tmpl",
 		Post{
-			Script:    Script,
+			Script:    conf.Server.Script,
 			PageTitle: postName,
 			Body:      buf.String(),
 		},
@@ -211,9 +215,9 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 }
 
 // CreateIndex creates an index file in every directory, made for navigation purposes
-func CreateIndex(PublDir, PostDir, directory string, t *template.Template, Script string) error {
+func CreateIndex(conf *config.General, directory string) error {
 	filename := (directory + string(filepath.Separator) + "index")
-	f, err := CreateHTMLFile(PublDir, PostDir, &filename)
+	f, err := CreateHTMLFile(conf.Directories.PublDir, conf.Directories.PostDir, &filename)
 	if err != nil {
 		return err
 	}
@@ -223,7 +227,7 @@ func CreateIndex(PublDir, PostDir, directory string, t *template.Template, Scrip
 		return err
 	}
 
-	return t.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files...), Script: Script})
+	return conf.Templates.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files...), Script: conf.Server.Script})
 }
 
 // ParseTemplates is used to parse all the templates inside the given directory

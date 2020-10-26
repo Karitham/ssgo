@@ -9,13 +9,12 @@ html {
 .body {
   max-width: 60rem;
   margin: 0 auto;
-  padding-top: 1em;
   padding: 1ch;
   text-align: justify;
 }
 
 img {
-  max-width: 50rem;
+  max-width: 60rem;
 }
 
 h1 {

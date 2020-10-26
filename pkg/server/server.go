@@ -2,38 +2,41 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 
+	"github.com/Karitham/ssgo/pkg/config"
+	"github.com/Karitham/ssgo/pkg/post"
 	"github.com/jaschaephraim/lrserver"
 	"gopkg.in/fsnotify.v1"
 )
 
 // Serve ...
-func Serve(port *uint16, log *log.Logger) error {
-	go liveReload(log, "./assets/css/", "./public/")
+func Serve(conf *config.General) error {
+	go liveReload(conf, "./assets/css/", "./public/", "./posts/")
 
 	http.Handle("/assets/css/", http.FileServer(http.Dir(".")))
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-	log.Printf("Live server listening at http://localhost:%d\n", *port)
+	conf.Log.Printf("Live server listening at http://localhost:%d\n", conf.Server.Port)
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	return http.ListenAndServe(fmt.Sprintf(":%d", conf.Server.Port), nil)
 }
 
-func liveReload(log *log.Logger, directories ...string) {
+func liveReload(conf *config.General, directories ...string) {
 	// Create file watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 	defer watcher.Close()
 
 	err = watch(watcher, directories...)
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 
 	// Create and start LiveReload server
@@ -43,17 +46,22 @@ func liveReload(log *log.Logger, directories ...string) {
 	lr.SetStatusLog(nil)
 
 	go func() {
-		log.Println(lr.ListenAndServe())
+		conf.Log.Println(lr.ListenAndServe())
 	}()
 
 	// Start goroutine that requests reload upon watcher event
 	go func() {
+		wg := sync.WaitGroup{}
 		for {
 			select {
 			case event := <-watcher.Events:
 				lr.Reload(event.Name)
+				if strings.HasPrefix(event.Name, conf.Directories.PostDir) {
+					wg.Add(1)
+					post.MakePost(event.Name, &wg, conf)
+				}
 			case err := <-watcher.Errors:
-				log.Println(err)
+				conf.Log.Println(err)
 			}
 		}
 	}()
