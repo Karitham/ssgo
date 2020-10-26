@@ -35,20 +35,17 @@ type IndexTree struct {
 	FileTitle string
 }
 
-// Script is used to insert the livereload script in the web page
-const Script string = "<script src=\"http://localhost:35729/livereload.js\"></script>"
-
-// Run is used to run the whole post making process
+// Execute is used to run the whole post making process
 // TODO : Add more options to run and make it extensible
-func Run(PostDir string, TemplateDir string, PublDir string) {
+func Execute(PostDir string, TemplateDir string, PublDir string, Script string, log *log.Logger) error {
 	posts, err := ListFiles(PostDir, true)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	t, err := ParseTemplates(TemplateDir)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	md := goldmark.New(
@@ -73,23 +70,27 @@ func Run(PostDir string, TemplateDir string, PublDir string) {
 			continue
 		}
 		wg.Add(1)
-		go MakePost(p, t, &md, &wg, PublDir, PostDir)
+		go MakePost(p, t, &md, &wg, PublDir, PostDir, Script)
 	}
 
 	wg.Wait()
 
 	// make index files
 	for _, d := range directories {
-		err := CreateIndex(PublDir, PostDir, d, t)
+		err := CreateIndex(PublDir, PostDir, d, t, Script)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 	}
+
+	log.Printf("Wrote %d files\n", len(posts)+len(directories))
+	return nil
 }
 
 // MakePost makes a post and inserts the content
-// TODO : Simplify function signature, make the post making extensible
-func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync.WaitGroup, PublDir string, PostDir string) {
+// TODO : Simplify function signature
+// TODO : have the post making extensible via config or such
+func MakePost(post string, t *template.Template, md *goldmark.Markdown, wg *sync.WaitGroup, PublDir string, PostDir string, Script string) {
 	defer wg.Done()
 
 	filecontent, err := ioutil.ReadFile(post)
@@ -210,7 +211,7 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 }
 
 // CreateIndex creates an index file in every directory, made for navigation purposes
-func CreateIndex(PublDir, PostDir, directory string, t *template.Template) error {
+func CreateIndex(PublDir, PostDir, directory string, t *template.Template, Script string) error {
 	filename := (directory + string(filepath.Separator) + "index")
 	f, err := CreateHTMLFile(PublDir, PostDir, &filename)
 	if err != nil {

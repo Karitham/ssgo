@@ -12,17 +12,18 @@ import (
 )
 
 // Serve ...
-func Serve(name string, port uint16) error {
-
-	go liveReload("./assets/css/", "./public/")
+func Serve(port *uint16, log *log.Logger) error {
+	go liveReload(log, "./assets/css/", "./public/")
 
 	http.Handle("/assets/css/", http.FileServer(http.Dir(".")))
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	log.Printf("Live server listening at http://localhost:%d\n", *port)
+
+	return http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 }
 
-func liveReload(directories ...string) {
+func liveReload(log *log.Logger, directories ...string) {
 	// Create file watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -42,7 +43,7 @@ func liveReload(directories ...string) {
 	lr.SetStatusLog(nil)
 
 	go func() {
-		lr.ListenAndServe()
+		log.Println(lr.ListenAndServe())
 	}()
 
 	// Start goroutine that requests reload upon watcher event
