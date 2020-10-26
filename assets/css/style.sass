@@ -5,37 +5,40 @@ $body-color: #ebdbb2
 $title-color: #fbf1c7
 $title-font-family: "Fira Code"
 $body-font-family: "Jetbrains Mono"
-$body-max-width: 40rem
-$code-max-width: 40rem
+$body-max-width: 60rem
 
 html
     background: $main-bg-color
     height: 100%
-    font-family: $body-color
+    width: 100%
+    font-family: $body-font-family
     color: $body-color
 
 .body
     max-width: $body-max-width
-    font-family: $body-font-family
     margin: 0 auto
     padding-top: 1em
+    padding: 1ch
     text-align: justify
 
 img
     max-width: 50rem
 
-h1,
-h2,
-h3,
-h4,
-h5
+h1
     font-family: $title-font-family
-    margin-bottom: 0.4rem
-    color: #fabd2f
+    color: #fb482f
+
+h2
+    font-family: $title-font-family
+    color: #b8bb26
+
+h3
+    font-family: $title-font-family
+    color: #d3869b
 
 a
     text-decoration: none
-    color: #e2e2e2
+    color: #83a598
 
 blockquote
     background-color: $quote-color
@@ -47,29 +50,28 @@ blockquote
 ::selection
     background-color: #91919165
 
-// Index highlighting
-
+// Index
 .index
-    text-align: center
-    margin: 0 0
-    padding: 20% 0
-    font-size: 5ch
+    max-width: $body-max-width
+    margin: 2ch auto
+    height: 100%
+
+.index ul
+    margin: 0 auto
 
 .index a
-    color: #ffe75e
+    color: #83a598
 
 .index li
-    display: inline-block
+    font-size: 4ch
     list-style-type: none
 
-// End of the Index highlighting
-
-// Code highlighting
+// Code
 .chroma,
-pre
+pre,
     font-family: $body-font-family
     background-color: $code-color
-    max-width: $code-max-width
+    max-width: $body-max-width
     padding: 1.4rem
     margin: 0.8rem 0
     border-radius: 0.2em
@@ -89,5 +91,3 @@ pre
 
 .kt
     color: #fabd2f
-
-// End of the code highlighting
