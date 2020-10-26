@@ -4,17 +4,84 @@ Very small static site generator.
 
 It currently support basic folder structures, but the navigation is clearly not optimal
 
-## Usage
+I am focusing on making the thing work right now, it is nowhere near usable in prod
+
+* [SSGO - ⚠️HEAVILY WIP⚠️](#ssgo---️heavily-wip️)
+* [Use](#use)
+  * [Install](#install)
+  * [Structure](#structure)
+  * [Write](#write)
+  * [Style](#style)
+* [Developpement](#developpement)
+  * [Templates](#templates)
+  * [Dependencies](#dependencies)
+* [License](#license)
+* [Author](#author)
+  [Templates](#templates)
+  [Dependencies](#dependencies)
+* [License](#license)
+* [Author](#author)
+  
+# Use
+
+## Install
+
+`go get github.com/Karitham/ssgo`
+
+This will install as a binary ready to use if the right directory is in your path.
+
+Just reproduce the following folder structure and use `ssgo` to generate HTML
+
+## Structure
+
+Here is an exemple folder structure, you only need the assets directory layed out with the templates in, and make posts in `posts` the rest is flexible.
+
+You can change the folder structure by changing the source code.
+
+```tree
+.
+├───assets
+│   ├───css
+│   │       style.css
+│   │       style.sass
+│   │
+│   └───templates
+│           index.tmpl
+│           post.tmpl
+│
+├───posts
+│   │   about.md
+│   │   _draft.md
+│   │
+│   └───Projects
+│           Random-RSS.md
+│
+└───public
+    │   about.html
+    │   index.html
+    │
+    └───Projects
+            index.html
+            Random-RSS.html
+```
+
+## Write
 
 Write a markdown post in `posts`
 
 All the files starting with `_` will not be generated, so you can use that to make drafts
 
-## Styling
+The output folder is `public`. It generates index files to navigate in the folder structure easily.
+
+## Style
 
 The theme is gruvbox-like, because I love gruvbox.
 
-You can customize everything in the `assets/css/main.css` to make your own style
+You can customize everything in `assets/css` to make your own style
+
+There is technically no restriction on style or how you structure it, just make sure you update the templates accordingly
+
+# Developpement
 
 ## Templates
 
@@ -26,7 +93,7 @@ For now it only support 2 templates and the code is not modular
 
 [https://github.com/alecthomas/chroma](github.com/alecthomas/chroma)
 
-## License
+# License
 
 ```license
 This is free and unencumbered software released into the public domain.
@@ -55,6 +122,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 ```
 
-## Author
+# Author
 
 PL "Karitham" Pery
