@@ -1,15 +1,15 @@
 html {
   background: #1f1f1f;
   height: 100%;
-  font-family: #ebdbb2;
+  width: 100%;
+  font-family: "Jetbrains Mono";
   color: #ebdbb2;
 }
 
 .body {
-  max-width: 40rem;
-  font-family: "Jetbrains Mono";
+  max-width: 50rem;
   margin: 0 auto;
-  padding-top: 1em;
+  padding: 0 2ch;
   text-align: justify;
 }
 
@@ -17,19 +17,24 @@ img {
   max-width: 50rem;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
+h1 {
   font-family: "Fira Code";
-  margin-bottom: 0.4rem;
-  color: #fabd2f;
+  color: #fb482f;
+}
+
+h2 {
+  font-family: "Fira Code";
+  color: #b8bb26;
+}
+
+h3 {
+  font-family: "Fira Code";
+  color: #d3869b;
 }
 
 a {
   text-decoration: none;
-  color: #e2e2e2;
+  color: #83a598;
 }
 
 blockquote {
@@ -49,48 +54,53 @@ blockquote {
 }
 
 .index {
-  text-align: center;
-  margin: 0;
-  padding: 20% 0;
-  font-size: 5ch;
+  max-width: 50rem;
+  margin: 2ch auto;
+  height: 100%;
+}
+
+.index ul {
+  margin: 0 auto;
 }
 
 .index a {
-  color: #ffe75e;
-}
-
-.index li {
-  display: inline-block;
-  list-style-type: none;
-}
-
-.chroma,
-pre {
-  font-family: "Jetbrains Mono";
-  background-color: #272727;
-  max-width: 40rem;
-  padding: 1.4rem;
-  margin: 0.8rem 0;
-  border-radius: 0.2em;
-}
-
-.kd,
-.kn {
-  color: #fb482f;
-}
-
-.s {
-  color: #b8bb26;
-}
-
-.nf {
   color: #83a598;
 }
 
-.kc {
+.index li {
+  font-size: 4ch;
+  list-style-type: none;
+}
+
+pre {
+  background-color: #272727;
+  font-family: "Jetbrains Mono";
+  max-width: 50rem;
+  padding: 1.4rem;
+  border-radius: 0.2em;
+  word-wrap: break-word;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  margin: 0.8rem 0;
+}
+
+pre .kd,
+pre .kn {
+  color: #fb482f;
+}
+
+pre .s {
+  color: #b8bb26;
+}
+
+pre .nf {
+  color: #83a598;
+}
+
+pre .kc {
   color: #d3869b;
 }
 
-.kt {
+pre .kt {
   color: #fabd2f;
 }
