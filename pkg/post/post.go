@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 
 	"github.com/Karitham/ssgo/pkg/config"
 )
@@ -31,15 +32,19 @@ type IndexTree struct {
 	FileTitle string
 }
 
+// Written count the number of file written
+var Written uint
+
 // Execute is used to run the whole post making process
 // TODO : Add more options to run and make it extensible
 func Execute(conf *config.General) error {
-	posts, err := ListFiles(conf.Directories.PostDir, true)
+	start := time.Now()
+	posts, err := ListFiles(conf.Directories.Post, true)
 	if err != nil {
 		return err
 	}
 
-	conf.Templates, err = ParseTemplates(conf.Directories.TemplateDir)
+	conf.Templates, err = ParseTemplates(conf.Directories.Tmpl)
 	if err != nil {
 		return err
 	}
@@ -55,7 +60,7 @@ func Execute(conf *config.General) error {
 		}
 	}
 
-	conf.Log.Printf("Wrote %d files\n", len(posts)+len(directories))
+	conf.Log.Printf("Wrote %d files in %s\n", Written, time.Now().Sub(start))
 	return nil
 }
 
@@ -69,8 +74,15 @@ func makePosts(posts []string, conf *config.General) []string {
 			directories = append(directories, p)
 			continue
 		}
+		// Verify if we're reading a markdown file
+		if !strings.EqualFold(filepath.Ext(p), ".md") {
+			continue
+		}
+
 		wg.Add(1)
 		go MakePost(p, &wg, conf)
+		Written++
+
 	}
 	wg.Wait()
 
@@ -91,7 +103,7 @@ func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 		conf.Log.Println(err)
 	}
 
-	f, err := CreateHTMLFile(conf.Directories.PublDir, conf.Directories.PostDir, &post)
+	f, err := CreateHTMLFile(conf.Directories.Publ, conf.Directories.Post, &post)
 	if err != nil {
 		conf.Log.Println(err)
 	}
@@ -201,7 +213,7 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 // CreateIndex creates an index file in every directory, made for navigation purposes
 func CreateIndex(conf *config.General, directory string) error {
 	filename := (directory + string(filepath.Separator) + "index")
-	f, err := CreateHTMLFile(conf.Directories.PublDir, conf.Directories.PostDir, &filename)
+	f, err := CreateHTMLFile(conf.Directories.Publ, conf.Directories.Post, &filename)
 	if err != nil {
 		return err
 	}
@@ -210,7 +222,7 @@ func CreateIndex(conf *config.General, directory string) error {
 	if err != nil {
 		return err
 	}
-
+	Written++
 	return conf.Templates.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files...), Script: conf.Server.Script})
 }
 

@@ -23,17 +23,16 @@ type General struct {
 
 // Server holds the configuration needed for the server part
 type Server struct {
-	Enabled bool
-	Name    string
-	Port    uint
-	Script  string
+	Name   string
+	Port   uint
+	Script string
 }
 
 // Directories represent the needed configurations for posts
 type Directories struct {
-	PublDir     string
-	TemplateDir string
-	PostDir     string
+	Publ string
+	Tmpl string
+	Post string
 }
 
 // New returns a default config
@@ -45,9 +44,9 @@ func New() *General {
 			Script: "<script src=\"http://localhost:35729/livereload.js\"></script>",
 		},
 		Directories: Directories{
-			PublDir:     "public",
-			TemplateDir: "assets/templates",
-			PostDir:     "posts",
+			Publ: "public",
+			Tmpl: "assets/templates",
+			Post: "posts",
 		},
 		Log: log.New(os.Stdout, "[SSGO] ", 0),
 
