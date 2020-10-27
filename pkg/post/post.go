@@ -60,7 +60,7 @@ func Execute(conf *config.General) error {
 		}
 	}
 
-	conf.Log.Printf("Wrote %d files in %s\n", Written, time.Now().Sub(start))
+	conf.Log.Printf("Wrote %d files in %s\n", Written, time.Since(start))
 	return nil
 }
 
