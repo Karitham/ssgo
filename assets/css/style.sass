@@ -5,7 +5,7 @@ $body-color: #ebdbb2
 $title-color: #fbf1c7
 $title-font-family: "Fira Code"
 $body-font-family: "Jetbrains Mono"
-$body-max-width: 60rem
+$body-max-width: 50rem
 
 html
     background: $main-bg-color
@@ -17,7 +17,7 @@ html
 .body
     max-width: $body-max-width
     margin: 0 auto
-    padding: 1ch
+    padding: 0 2ch
     text-align: justify
 
 img
@@ -66,8 +66,8 @@ blockquote
     list-style-type: none
 
 // Code
-.chroma,
 pre,
+.chroma
     font-family: $body-font-family
     background-color: $code-color
     max-width: $body-max-width

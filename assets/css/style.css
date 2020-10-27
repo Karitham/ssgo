@@ -7,14 +7,14 @@ html {
 }
 
 .body {
-  max-width: 60rem;
+  max-width: 50rem;
   margin: 0 auto;
-  padding: 1ch;
+  padding: 0 2ch;
   text-align: justify;
 }
 
 img {
-  max-width: 60rem;
+  max-width: 50rem;
 }
 
 h1 {
@@ -54,7 +54,7 @@ blockquote {
 }
 
 .index {
-  max-width: 60rem;
+  max-width: 50rem;
   margin: 2ch auto;
   height: 100%;
 }
@@ -72,11 +72,11 @@ blockquote {
   list-style-type: none;
 }
 
-.chroma,
-pre {
+pre,
+.chroma {
   font-family: "Jetbrains Mono";
   background-color: #272727;
-  max-width: 60rem;
+  max-width: 50rem;
   padding: 1.4rem;
   margin: 0.8rem 0;
   border-radius: 0.2em;

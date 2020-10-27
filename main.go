@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/Karitham/ssgo/pkg/config"
@@ -24,7 +23,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:    "server",
-				Usage:   "serve your files with a liveserver",
+				Usage:   "serve your files with a live reloading server",
 				Aliases: []string{"s", "serve"},
 				Action: func(_ *cli.Context) error {
 					err := post.Execute(conf)
@@ -33,12 +32,21 @@ func main() {
 					}
 					return server.Serve(conf)
 				},
+				Flags: []cli.Flag{
+					&cli.UintFlag{
+						Name:        "port",
+						Aliases:     []string{"p"},
+						Value:       conf.Server.Port,
+						Usage:       "Change the port of the live reload server",
+						Destination: &conf.Server.Port,
+					},
+				},
 			},
 		},
 	}
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatalln(err)
+		conf.Log.Fatalln(err)
 	}
 }

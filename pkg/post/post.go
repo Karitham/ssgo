@@ -3,7 +3,6 @@ package post
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,10 +10,6 @@ import (
 	"text/template"
 
 	"github.com/Karitham/ssgo/pkg/config"
-	"github.com/alecthomas/chroma/formatters/html"
-	mathjax "github.com/litao91/goldmark-mathjax"
-	"github.com/yuin/goldmark"
-	highlighting "github.com/yuin/goldmark-highlighting"
 )
 
 // Post represent the templated file
@@ -48,15 +43,6 @@ func Execute(conf *config.General) error {
 	if err != nil {
 		return err
 	}
-
-	conf.Markdown = goldmark.New(
-		goldmark.WithExtensions(mathjax.MathJax),
-		goldmark.WithExtensions(
-			highlighting.NewHighlighting(
-				highlighting.WithFormatOptions(html.WithClasses(true)),
-			),
-		),
-	)
 
 	// make each post
 	directories := makePosts(posts, conf)
@@ -92,24 +78,22 @@ func makePosts(posts []string, conf *config.General) []string {
 }
 
 // MakePost makes a post and inserts the content
-// TODO : Simplify function signature
-// TODO : have the post making extensible via config or such
 func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 	defer wg.Done()
 
 	filecontent, err := ioutil.ReadFile(post)
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 
 	var buf bytes.Buffer
 	if err := conf.Markdown.Convert(filecontent, &buf); err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 
 	f, err := CreateHTMLFile(conf.Directories.PublDir, conf.Directories.PostDir, &post)
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 
 	postName := GetFilename(TrimFileExt(post))
@@ -123,12 +107,12 @@ func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 		},
 	)
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 
 	err = f.Close()
 	if err != nil {
-		log.Println(err)
+		conf.Log.Println(err)
 	}
 }
 
