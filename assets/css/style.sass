@@ -66,27 +66,29 @@ blockquote
     list-style-type: none
 
 // Code
-pre,
-.chroma
+span
     font-family: $body-font-family
     background-color: $code-color
     max-width: $body-max-width
     padding: 1.4rem
     margin: 0.8rem 0
     border-radius: 0.2em
+    white-space: pre-wrap
+    word-wrap: break-word
+    overflow-x: hidden
 
-.kd,
-.kn
-    color: #fb482f
+    .kd,
+    .kn
+        color: #fb482f
 
-.s
-    color: #b8bb26
+    .s
+        color: #b8bb26
 
-.nf
-    color: #83a598
+    .nf
+        color: #83a598
 
-.kc
-    color: #d3869b
+    .kc
+        color: #d3869b
 
-.kt
-    color: #fabd2f
+    .kt
+        color: #fabd2f

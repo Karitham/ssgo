@@ -9,6 +9,7 @@ import (
 	mathjax "github.com/litao91/goldmark-mathjax"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
 )
 
 // General holds all of the configuration
@@ -52,10 +53,12 @@ func New() *General {
 
 		Markdown: goldmark.New(
 			goldmark.WithExtensions(mathjax.MathJax),
+			goldmark.WithExtensions(extension.GFM),
 			goldmark.WithExtensions(
 				highlighting.NewHighlighting(
-					highlighting.WithFormatOptions(html.WithClasses(true)),
-					highlighting.WithGuessLanguage(true),
+					highlighting.WithFormatOptions(
+						html.WithClasses(true),
+					),
 				),
 			),
 		),

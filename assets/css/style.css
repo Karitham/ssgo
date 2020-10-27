@@ -72,33 +72,35 @@ blockquote {
   list-style-type: none;
 }
 
-pre,
-.chroma {
+span {
   font-family: "Jetbrains Mono";
   background-color: #272727;
   max-width: 50rem;
   padding: 1.4rem;
   margin: 0.8rem 0;
   border-radius: 0.2em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: hidden;
 }
 
-.kd,
-.kn {
+span .kd,
+span .kn {
   color: #fb482f;
 }
 
-.s {
+span .s {
   color: #b8bb26;
 }
 
-.nf {
+span .nf {
   color: #83a598;
 }
 
-.kc {
+span .kc {
   color: #d3869b;
 }
 
-.kt {
+span .kt {
   color: #fabd2f;
 }
