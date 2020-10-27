@@ -72,35 +72,35 @@ blockquote {
   list-style-type: none;
 }
 
-span {
-  font-family: "Jetbrains Mono";
+pre {
   background-color: #272727;
+  font-family: "Jetbrains Mono";
   max-width: 50rem;
   padding: 1.4rem;
-  margin: 0.8rem 0;
   border-radius: 0.2em;
-  white-space: pre-wrap;
   word-wrap: break-word;
   overflow-x: hidden;
+  white-space: pre-wrap;
+  margin: 0.8rem 0;
 }
 
-span .kd,
-span .kn {
+pre .kd,
+pre .kn {
   color: #fb482f;
 }
 
-span .s {
+pre .s {
   color: #b8bb26;
 }
 
-span .nf {
+pre .nf {
   color: #83a598;
 }
 
-span .kc {
+pre .kc {
   color: #d3869b;
 }
 
-span .kt {
+pre .kt {
   color: #fabd2f;
 }
