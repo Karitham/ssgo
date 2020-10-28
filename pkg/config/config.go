@@ -45,7 +45,7 @@ func New() *General {
 		},
 		Directories: Directories{
 			Publ: "public",
-			Tmpl: "assets/templates",
+			Tmpl: "templates",
 			Post: "posts",
 		},
 		Log: log.New(os.Stdout, "[SSGO] ", 0),

@@ -32,8 +32,8 @@ type IndexTree struct {
 	FileTitle string
 }
 
-// Written count the number of file written
-var Written uint
+// written count the number of file written
+var written uint
 
 // Execute is used to run the whole post making process
 // TODO : Add more options to run and make it extensible
@@ -54,13 +54,13 @@ func Execute(conf *config.General) error {
 
 	// make index files
 	for _, d := range directories {
-		err := CreateIndex(conf, d)
+		err := createIndex(conf, d)
 		if err != nil {
 			return err
 		}
 	}
 
-	conf.Log.Printf("Wrote %d files in %s\n", Written, time.Since(start))
+	conf.Log.Printf("Wrote %d files in %s\n", written, time.Since(start))
 	return nil
 }
 
@@ -81,8 +81,7 @@ func makePosts(posts []string, conf *config.General) []string {
 
 		wg.Add(1)
 		go MakePost(p, &wg, conf)
-		Written++
-
+		written++
 	}
 	wg.Wait()
 
@@ -103,12 +102,12 @@ func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 		conf.Log.Println(err)
 	}
 
-	f, err := CreateHTMLFile(conf.Directories.Publ, conf.Directories.Post, &post)
+	f, err := createHTMLFile(conf.Directories.Publ, conf.Directories.Post, &post)
 	if err != nil {
 		conf.Log.Println(err)
 	}
 
-	postName := GetFilename(TrimFileExt(post))
+	postName := GetFilename(trimFileExt(post))
 
 	err = conf.Templates.ExecuteTemplate(f,
 		"post.tmpl",
@@ -128,13 +127,13 @@ func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
 	}
 }
 
-// TrimDir trims the directory of the given path
-func TrimDir(path, dir string) string {
+// trimDir trims the directory of the given path
+func trimDir(path, dir string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(path, dir), string(filepath.Separator))
 }
 
-// TrimFileExt returns the path without the fileExt
-func TrimFileExt(path string) string {
+// trimFileExt returns the path without the fileExt
+func trimFileExt(path string) string {
 	return path[:len(path)-len(filepath.Ext(path))]
 }
 
@@ -154,13 +153,13 @@ func ConvertExt(file string, ext string) string {
 	return file[:len(file)-len(filepath.Ext(file))] + "." + ext
 }
 
-// CreateHTMLFile create an html file in the publDir that has the same path and name as the filepath input
-func CreateHTMLFile(publDir, postDir string, filePath *string) (file *os.File, err error) {
+// createHTMLFile create an html file in the publDir that has the same path and name as the filepath input
+func createHTMLFile(publDir, postDir string, filePath *string) (file *os.File, err error) {
 	// Convert the `.md` file to a `html` and change the directory
-	var publpath = ConvertExt(filepath.Join(publDir, TrimDir(*filePath, postDir)), "html")
+	var publpath = ConvertExt(filepath.Join(publDir, trimDir(*filePath, postDir)), "html")
 
 	// Get the final directory path
-	dir := filepath.Join(publDir, TrimDir(trimFilename(*filePath), postDir))
+	dir := filepath.Join(publDir, trimDir(trimFilename(*filePath), postDir))
 
 	// Make the final directory if it doesn't exist
 	err = os.MkdirAll(dir, 0755)
@@ -202,7 +201,7 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 		tree = append(
 			tree,
 			IndexTree{
-				FileTitle: strings.ToUpper(TrimFileExt(fn)),
+				FileTitle: strings.ToUpper(trimFileExt(fn)),
 				FileURL:   fn,
 			},
 		)
@@ -210,10 +209,10 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 	return
 }
 
-// CreateIndex creates an index file in every directory, made for navigation purposes
-func CreateIndex(conf *config.General, directory string) error {
+// createIndex creates an index file in every directory, made for navigation purposes
+func createIndex(conf *config.General, directory string) error {
 	filename := (directory + string(filepath.Separator) + "index")
-	f, err := CreateHTMLFile(conf.Directories.Publ, conf.Directories.Post, &filename)
+	f, err := createHTMLFile(conf.Directories.Publ, conf.Directories.Post, &filename)
 	if err != nil {
 		return err
 	}
@@ -222,7 +221,7 @@ func CreateIndex(conf *config.General, directory string) error {
 	if err != nil {
 		return err
 	}
-	Written++
+	written++
 	return conf.Templates.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files...), Script: conf.Server.Script})
 }
 

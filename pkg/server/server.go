@@ -16,9 +16,9 @@ import (
 
 // Serve ...
 func Serve(conf *config.General) error {
-	go liveReload(conf, "./assets/css/", "./public/", "./posts/")
+	go liveReload(conf, "./assets/", "./public/", "./posts/")
 
-	http.Handle("/assets/css/", http.FileServer(http.Dir(".")))
+	http.Handle("/assets/", http.FileServer(http.Dir(".")))
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
 	conf.Log.Printf("Live server listening at http://localhost:%d\n", conf.Server.Port)

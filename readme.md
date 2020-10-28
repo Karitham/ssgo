@@ -45,8 +45,8 @@ COMMANDS:
 GLOBAL OPTIONS:
    --post value  Change the post directory (default: "posts")
    --publ value  Change the publication directory (default: "public")
-   --tmpl value  Change the template directory (default: "assets/templates")
-   --help, -h    show help (default: false)
+   --tmpl value  Change the template directory (default: "templates")
+   --help, -h    show help (default: false
 ````
 
 The server is useful if you want to have a preview of what your site looks like. At each save of the file you are working on, the according part of the site is reloaded (be it css or text).
@@ -60,28 +60,28 @@ Here is the default folder structure. You can change where the templates / posts
 ```tree
 .
 ├───assets
-│   ├───css
-│   │       style.css
-│   │       style.sass
-│   │
-│   └───templates
-│           index.tmpl
-│           post.tmpl
+│   └───css
+│           style.css
+│           style.sass
 │
 ├───posts
 │   │   about.md
-│   │   _draft.md
+│   │   _empty.md
 │   │
 │   └───Projects
-│           WaifuBot.md
+│           Random-RSS.md
 │
-└───public
-    │   about.html
-    │   index.html
-    │
-    └───Projects
-            index.html
-            WaifuBot.html
+├───public
+│   │   about.html
+│   │   index.html
+│   │
+│   └───Projects
+│           index.html
+│           Random-RSS.html
+│
+└───templates
+        index.tmpl
+        post.tmpl
 ```
 
 ## Writing

@@ -2,14 +2,14 @@ html {
   background: #1f1f1f;
   height: 100%;
   width: 100%;
-  font-family: "Jetbrains Mono";
+  font-family: Fira Code, IBM Plex Mono, Fira Code, monospace;
   color: #ebdbb2;
 }
 
 .body {
   max-width: 50rem;
   margin: 0 auto;
-  padding: 0 2ch;
+  padding: 1ch 2ch;
   text-align: justify;
 }
 
@@ -18,18 +18,18 @@ img {
 }
 
 h1 {
-  font-family: "Fira Code";
-  color: #fb482f;
+  font-family: Jetbrains Mono, Fira Code, monospace;
+  color: Jetbrains Mono, Fira Code, monospace;
 }
 
 h2 {
-  font-family: "Fira Code";
-  color: #b8bb26;
+  font-family: Jetbrains Mono, Fira Code, monospace;
+  color: Jetbrains Mono, Fira Code, monospace;
 }
 
 h3 {
-  font-family: "Fira Code";
-  color: #d3869b;
+  font-family: Jetbrains Mono, Fira Code, monospace;
+  color: Jetbrains Mono, Fira Code, monospace;
 }
 
 a {
@@ -55,6 +55,7 @@ blockquote {
 
 .index {
   max-width: 50rem;
+  font-family: Jetbrains Mono, Fira Code, monospace;
   margin: 2ch auto;
   height: 100%;
 }
@@ -72,9 +73,17 @@ blockquote {
   list-style-type: none;
 }
 
+code {
+  background-color: #272727;
+  font-family: IBM Plex Mono, Jetbrains Mono, monospace;
+  max-width: 50rem;
+  padding: 0.4ch;
+  border-radius: 0.2em;
+}
+
 pre {
   background-color: #272727;
-  font-family: "Jetbrains Mono";
+  font-family: IBM Plex Mono, Jetbrains Mono, monospace;
   max-width: 50rem;
   padding: 1.4rem;
   border-radius: 0.2em;
