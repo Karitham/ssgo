@@ -51,14 +51,45 @@ func liveReload(conf *config.General, directories ...string) {
 
 	// Start goroutine that requests reload upon watcher event
 	go func() {
-		wg := sync.WaitGroup{}
+		var wg = new(sync.WaitGroup)
+		var toW post.Writer
 		for {
 			select {
 			case event := <-watcher.Events:
-				if strings.HasPrefix(event.Name, conf.Directories.Post) &&
-					!strings.HasPrefix(post.GetFilename(event.Name), "_") {
+				// Check if the event is what we are looking for
+				if strings.HasPrefix(post.GetFilename(event.Name), "_") ||
+					strings.HasPrefix(event.Name, conf.Directories.Publ) ||
+					event.Op == fsnotify.Remove {
+					continue
+				}
+				if event.Op == fsnotify.Create {
+					toW = &post.Post{
+						Path:      event.Name,
+						WaitGroup: wg,
+						Config:    conf,
+					}
 					wg.Add(1)
-					post.MakePost(event.Name, &wg, conf)
+					err := toW.Write()
+					if err != nil {
+						conf.Log.Println(err)
+					}
+					toW = &post.Index{
+						Path:      post.TrimFilename(event.Name),
+						WaitGroup: wg,
+						Config:    conf,
+					}
+				} else if strings.HasPrefix(event.Name, conf.Directories.Post) {
+					toW = &post.Post{
+						Path:      event.Name,
+						WaitGroup: wg,
+						Config:    conf,
+					}
+				}
+
+				wg.Add(1)
+				err := toW.Write()
+				if err != nil {
+					conf.Log.Println(err)
 				}
 				wg.Wait()
 				lr.Reload(event.Name)

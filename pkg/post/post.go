@@ -13,17 +13,28 @@ import (
 	"github.com/Karitham/ssgo/pkg/config"
 )
 
+// Writer is what can be written
+type Writer interface {
+	Write() error
+}
+
 // Post represent the templated file
 type Post struct {
 	Script    string
 	PageTitle string
 	Body      string
+	Config    *config.General
+	WaitGroup *sync.WaitGroup
+	Path      string
 }
 
 // Index represent the templated Index file
 type Index struct {
-	FileTree []IndexTree
-	Script   string
+	FileTree  []IndexTree
+	Script    string
+	Config    *config.General
+	WaitGroup *sync.WaitGroup
+	Path      string
 }
 
 // IndexTree represent each file present in the current directory by it's URL and name
@@ -32,12 +43,10 @@ type IndexTree struct {
 	FileTitle string
 }
 
-// written count the number of file written
-var written uint
-
 // Execute is used to run the whole post making process
-// TODO : Add more options to run and make it extensible
 func Execute(conf *config.General) error {
+	// written count the number of file written
+	var written uint
 	start := time.Now()
 	posts, err := ListFiles(conf.Directories.Post, true)
 	if err != nil {
@@ -49,82 +58,101 @@ func Execute(conf *config.General) error {
 		return err
 	}
 
-	// make each post
-	directories := makePosts(posts, conf)
+	// make everything
+	var wg = new(sync.WaitGroup)
+	var toW Writer
+	var Indexes []Writer
+	for _, p := range posts {
+		written++
+		if file, err := os.Lstat(p); err == nil && file.IsDir() {
+			Indexes = append(
+				Indexes,
+				&Index{
+					Path:      p,
+					Config:    conf,
+					WaitGroup: wg,
+				},
+			)
+			continue
+		} else if !strings.EqualFold(filepath.Ext(p), ".md") {
+			continue
+		} else {
+			toW = &Post{
+				Path:      p,
+				Config:    conf,
+				WaitGroup: wg,
+			}
+		}
 
-	// make index files
-	for _, d := range directories {
-		err := createIndex(conf, d)
+		wg.Add(1)
+		go func() {
+			if err = toW.Write(); err != nil {
+				conf.Log.Println(err)
+			}
+		}()
+
+	}
+	wg.Wait()
+	for _, i := range Indexes {
+		wg.Add(1)
+		err := i.Write()
 		if err != nil {
-			return err
+			conf.Log.Println(err)
 		}
 	}
+	wg.Wait()
 
 	conf.Log.Printf("Wrote %d files in %s\n", written, time.Since(start))
 	return nil
 }
 
-func makePosts(posts []string, conf *config.General) []string {
-	// wg waits for the goroutine to finish making all the files
-	// before making the navigation menu
-	var directories []string
-	var wg sync.WaitGroup
-	for _, p := range posts {
-		if file, err := os.Lstat(p); err == nil && file.IsDir() {
-			directories = append(directories, p)
-			continue
-		}
-		// Verify if we're reading a markdown file
-		if !strings.EqualFold(filepath.Ext(p), ".md") {
-			continue
-		}
-
-		wg.Add(1)
-		go MakePost(p, &wg, conf)
-		written++
+func (i *Index) Write() error {
+	defer i.WaitGroup.Done()
+	filename := (i.Path + string(filepath.Separator) + "index")
+	f, err := createHTMLFile(&i.Config.Directories.Publ, &i.Config.Directories.Post, filename)
+	if err != nil {
+		return err
 	}
-	wg.Wait()
 
-	return directories
+	files, err := ioutil.ReadDir(TrimFilename(f.Name()))
+	if err != nil {
+		return err
+	}
+	return i.Config.Templates.ExecuteTemplate(
+		f, "index.tmpl", Index{
+			FileTree: FileTree(files...),
+			Script:   i.Script,
+		})
 }
 
-// MakePost makes a post and inserts the content
-func MakePost(post string, wg *sync.WaitGroup, conf *config.General) {
-	defer wg.Done()
+func (p *Post) Write() error {
+	defer p.WaitGroup.Done()
 
-	filecontent, err := ioutil.ReadFile(post)
+	filecontent, err := ioutil.ReadFile(p.Path)
 	if err != nil {
-		conf.Log.Println(err)
+		return err
 	}
 
 	var buf bytes.Buffer
-	if err := conf.Markdown.Convert(filecontent, &buf); err != nil {
-		conf.Log.Println(err)
+	if err := p.Config.Markdown.Convert(filecontent, &buf); err != nil {
+		return err
 	}
 
-	f, err := createHTMLFile(conf.Directories.Publ, conf.Directories.Post, &post)
+	f, err := createHTMLFile(&p.Config.Directories.Publ, &p.Config.Directories.Post, p.Path)
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 	if err != nil {
-		conf.Log.Println(err)
+		return err
 	}
 
-	postName := GetFilename(trimFileExt(post))
-
-	err = conf.Templates.ExecuteTemplate(f,
-		"post.tmpl",
-		Post{
-			Script:    conf.Server.Script,
-			PageTitle: postName,
+	postName := GetFilename(trimFileExt(p.Path))
+	return p.Config.Templates.ExecuteTemplate(
+		f, "post.tmpl", Post{
 			Body:      buf.String(),
-		},
-	)
-	if err != nil {
-		conf.Log.Println(err)
-	}
-
-	err = f.Close()
-	if err != nil {
-		conf.Log.Println(err)
-	}
+			Script:    p.Config.Server.Script,
+			PageTitle: postName,
+		})
 }
 
 // trimDir trims the directory of the given path
@@ -137,15 +165,15 @@ func trimFileExt(path string) string {
 	return path[:len(path)-len(filepath.Ext(path))]
 }
 
-// trimFilename returns the directory path
-func trimFilename(path string) string {
+// TrimFilename returns the directory path
+func TrimFilename(path string) string {
 	splittedPath := strings.Split(path, string(filepath.Separator))
 	return strings.TrimSuffix(path, splittedPath[len(splittedPath)-1])
 }
 
 // GetFilename is used to retrieve the the filename of a file from a path, returns the extension too
 func GetFilename(path string) string {
-	return string(path[len(trimFilename(path)):])
+	return string(path[len(TrimFilename(path)):])
 }
 
 // ConvertExt changes a file's extension to the given ext, for example "html".
@@ -154,12 +182,12 @@ func ConvertExt(file string, ext string) string {
 }
 
 // createHTMLFile create an html file in the publDir that has the same path and name as the filepath input
-func createHTMLFile(publDir, postDir string, filePath *string) (file *os.File, err error) {
+func createHTMLFile(publDir, postDir *string, filePath string) (file *os.File, err error) {
 	// Convert the `.md` file to a `html` and change the directory
-	var publpath = ConvertExt(filepath.Join(publDir, trimDir(*filePath, postDir)), "html")
+	var publpath = ConvertExt(filepath.Join(*publDir, trimDir(filePath, *postDir)), "html")
 
 	// Get the final directory path
-	dir := filepath.Join(publDir, trimDir(trimFilename(*filePath), postDir))
+	dir := filepath.Join(*publDir, trimDir(TrimFilename(filePath), *postDir))
 
 	// Make the final directory if it doesn't exist
 	err = os.MkdirAll(dir, 0755)
@@ -207,22 +235,6 @@ func FileTree(f ...os.FileInfo) (tree []IndexTree) {
 		)
 	}
 	return
-}
-
-// createIndex creates an index file in every directory, made for navigation purposes
-func createIndex(conf *config.General, directory string) error {
-	filename := (directory + string(filepath.Separator) + "index")
-	f, err := createHTMLFile(conf.Directories.Publ, conf.Directories.Post, &filename)
-	if err != nil {
-		return err
-	}
-
-	files, err := ioutil.ReadDir(trimFilename(f.Name()))
-	if err != nil {
-		return err
-	}
-	written++
-	return conf.Templates.ExecuteTemplate(f, "index.tmpl", Index{FileTree: FileTree(files...), Script: conf.Server.Script})
 }
 
 // ParseTemplates is used to parse all the templates inside the given directory
