@@ -3,7 +3,7 @@ module github.com/Karitham/ssgo
 go 1.14
 
 require (
-	github.com/alecthomas/chroma v0.8.1
+	github.com/alecthomas/chroma v0.8.2
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
