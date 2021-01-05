@@ -2,41 +2,37 @@ html {
   background: #1f1f1f;
   height: 100%;
   width: 100%;
-  font-family: "Jetbrains Mono";
+  font-family: monospace;
   color: #ebdbb2;
 }
-
 .body {
   max-width: 50rem;
   margin: 0 auto;
-  padding: 0 2ch;
+  padding: 1em 2ch;
   text-align: justify;
 }
-
 img {
   max-width: 50rem;
 }
-
+p {
+  font-size: 120%;
+}
 h1 {
-  font-family: "Fira Code";
-  color: #fb482f;
+  font-family: "IBM Plex Mono", "Fira Code", "Jetbrains Mono", monospace;
+  color: #f7daa4;
 }
-
 h2 {
-  font-family: "Fira Code";
-  color: #b8bb26;
+  font-family: "IBM Plex Mono", "Fira Code", "Jetbrains Mono", monospace;
+  color: #fcd588;
 }
-
 h3 {
-  font-family: "Fira Code";
-  color: #d3869b;
+  font-family: "IBM Plex Mono", "Fira Code", "Jetbrains Mono", monospace;
+  color: #eec676;
 }
-
 a {
   text-decoration: none;
-  color: #83a598;
+  color: #98971a;
 }
-
 blockquote {
   background-color: #242424;
   border-radius: 0.2em;
@@ -44,63 +40,36 @@ blockquote {
   margin: 0.1rem;
   padding: 0.4rem 1.2rem;
 }
-
 ::-moz-selection {
-  background-color: #91919165;
+  background-color: #91919183;
 }
-
 ::selection {
-  background-color: #91919165;
+  background-color: #91919183;
 }
-
-.index {
-  max-width: 50rem;
-  margin: 2ch auto;
-  height: 100%;
-}
-
-.index ul {
-  margin: 0 auto;
-}
-
-.index a {
-  color: #83a598;
-}
-
-.index li {
-  font-size: 4ch;
-  list-style-type: none;
-}
-
 pre {
   background-color: #272727;
-  font-family: "Jetbrains Mono";
+  font-family: monospace;
   max-width: 50rem;
   padding: 1.4rem;
   border-radius: 0.2em;
   word-wrap: break-word;
-  overflow-x: hidden;
-  white-space: pre-wrap;
+  overflow-x: auto;
   margin: 0.8rem 0;
 }
-
 pre .kd,
-pre .kn {
+pre .kn,
+pre .k {
   color: #fb482f;
 }
-
 pre .s {
   color: #b8bb26;
 }
-
 pre .nf {
   color: #83a598;
 }
-
 pre .kc {
   color: #d3869b;
 }
-
 pre .kt {
   color: #fabd2f;
 }

@@ -1,68 +1,30 @@
-# SSGO
+# SSGO ⚠️ REWRITE ⚠️
 
 Very small static site generator.
 
-It currently support folder structures, but the navigation is not optimal
+## Changelog
 
-I am focused on making the thing work right now, don't use this in prod
-
-* [SSGO](#ssgo)
-  * [Installing](#installing)
-  * [Usage](#usage)
-  * [Structure](#structure)
-  * [Writing](#writing)
-  * [Styling](#styling)
-* [Developpement](#developpement)
-  * [Templates](#templates)
-  * [Dependencies](#dependencies)
-* [License](#license)
-* [Author](#author)
-  
-## Installing
-
-`go get github.com/Karitham/ssgo`
-
-This will install as a binary ready to use if the right directory is in your path.
-
-Just reproduce the following folder structure and use `ssgo` to generate HTML
-
-## Usage
-
-There are a few commands you can use to help you during the writing of your site.
-
-````help
-❯ ssgo --help
-NAME:
-   SSGO - Generate HTML based on the markdown you provide, easily customizable with your own theme
-
-USAGE:
-   ssgo [global options] command [command options]
-
-COMMANDS:
-   server, s  serve your files with a live reloading server
-   help, h    Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --post value  Change the post directory (default: "posts")
-   --publ value  Change the publication directory (default: "public")
-   --tmpl value  Change the template directory (default: "assets/templates")
-   --help, -h    show help (default: false)
-````
-
-The server is useful if you want to have a preview of what your site looks like. At each save of the file you are working on, the according part of the site is reloaded (be it css or text).
-
-There are available command options for each command, which can be used to change the directories you read / write to etc
+- Rewrote the generation and parsing to be modular
+  - support yaml metadata
+  - will try to support other metadata arguments
+  - the [file walker](cmd/post/fstructure.go) is cool
+  - using interface to enable extensibility, I'm not sure of the choice yet.
+- Planning to rewrite the server next
+- I may include the CSS directly in the HTML so I don't have to serve the css somewhere else, not sure yet
+- A lot of logging added, which is cool for developpement
+- I may swap to using a CSS framework because I can't style
+- The index is much more modular, I will add the descriptions of the file when trying to style it.
+- I'm aiming for simplicity and not speed, but it's probably one of the fastest due to go properties.
 
 ## Structure
 
-Here is the default folder structure. You can change where the templates / posts / publication directory are by using global options
+Here is the default folder structure.
 
 ```tree
 .
 ├───assets
 │   ├───css
 │   │       style.css
-│   │       style.sass
 │   │
 │   └───templates
 │           index.tmpl
@@ -83,34 +45,6 @@ Here is the default folder structure. You can change where the templates / posts
             index.html
             WaifuBot.html
 ```
-
-## Writing
-
-Write a markdown post in `posts`, or your own folder
-
-All the files starting with `_` will not be generated, so you can use that to make drafts
-
-Index files are generated to make the navigation easy.
-
-## Styling
-
-The theme is gruvbox-like, because I love gruvbox.
-
-You can customize everything in `assets/css` to make your own style
-
-There is technically no restriction on style or how you structure it, just make sure you update the templates accordingly
-
-# Developpement
-
-## Templates
-
-For now it only support 2 templates and the code is not exactly modular
-
-## Dependencies
-
-[https://github.com/yuin/goldmark](https://github.com/yuin/goldmark)
-
-[https://github.com/alecthomas/chroma](github.com/alecthomas/chroma)
 
 # License
 
