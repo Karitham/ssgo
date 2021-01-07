@@ -44,12 +44,12 @@ func buildRecursive(conf *cfg.Global, tmpl *template.Template, md goldmark.Markd
 
 	// Recursive calling for each directory
 	wg := new(sync.WaitGroup)
-	for i := range folder.Folders {
+	for _, f := range folder.Folders {
 		wg.Add(1)
 		go func(folder post.Folder) {
 			buildRecursive(conf, tmpl, md, &folder)
 			wg.Done()
-		}(folder.Folders[i])
+		}(f)
 	}
 	wg.Wait()
 

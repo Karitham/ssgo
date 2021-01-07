@@ -1,29 +1,57 @@
-# SSGO ⚠️ REWRITE ⚠️
+# ⚠️ SSGO REWRITE ⚠️
 
 Very small static site generator.
 
-## Changelog
+Rewrite happening, this means a few things:
 
-- Added a Filtrer func functional style
-- Simplify a few method / func signatures
-- Implement a config package
-- Fix the making of index files
+- Things are breaking
+- Things may not work
+- Features are missing
+- Theming is not done and completely optional
+- Performance may not be there
+- Code is cleaner
 
-## TODO
+## Plans
 
-- Server
-  - Live reload
-  - File watcher
-- Configuration
-  - Loading from file
-  - CLI
-- Upgrade Poster interface
-- Use metadata maps more efficiently
-- Fix indexes
-  - Preview of the content
-  - Tags / metadata display
-  - Ability to move to the next index
-- Work on CSS
+Here are the goals planned for this rewrite
+
+If anybody sees this and has any suggestion, please open an issue.
+
+### TODO
+
+- [ ]  Server
+  - [ ]  Live reload
+    - [ ]  Use of Watcher to re generate the files and indexes
+  - [ ]  File watcher
+    - [ ]  Interface with the fs
+- [ ]  Configuration
+  - [ ]  Loading from file
+  - [ ]  CLI
+- [ ]  Use metadata maps more efficiently
+- [ ]  Fix indexes
+  - [ ]  Preview of the content
+  - [ ]  Tags / metadata display
+  - [ ]  Date use ?
+  - [ ]  Ability to move to the next index
+- [ ]  Work on CSS (devide Index & Article)
+
+### DONE
+
+- [x]  Filter files while flattening
+- [x]  Implement a better version of the Runner
+- [x]  Fix data race on index building
+- [x]  Rewrite the generation and parsing to be modular
+  - [x]  YAML metadata
+    - [x]  Use a Map for metadata
+    - [x]  Made the metadata parsing generic to any `Poster`
+  - [x]  build a good [file walker](https://github.com/Karitham/ssgo/blob/rewrite/cmd/post/fs.go)
+- [x]  Logging
+- [x]  Make index modular
+
+### Maybe
+
+- Use a CSS Framework
+- Improve the fs package and release as seperate
 
 ## Structure
 
