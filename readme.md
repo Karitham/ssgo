@@ -4,17 +4,11 @@ Very small static site generator.
 
 ## Changelog
 
-- Rewrote the generation and parsing to be modular
-  - support yaml metadata
-  - will try to support other metadata arguments
-  - the [file walker](cmd/post/fstructure.go) is cool
-  - using interface to enable extensibility, I'm not sure of the choice yet.
-- Planning to rewrite the server next
-- I may include the CSS directly in the HTML so I don't have to serve the css somewhere else, not sure yet
-- A lot of logging added, which is cool for developpement
-- I may swap to using a CSS framework because I can't style
-- The index is much more modular, I will add the descriptions of the file when trying to style it.
-- I'm aiming for simplicity and not speed, but it's probably one of the fastest due to go properties.
+- Added a function to be able to filter files while flattening (which is super cool I love the impl)
+- Use a Map for metadata
+  - Made the metadata parsing generic to any `Poster`
+- Implemented a better version of the Runner
+- Fixed a data race
 
 ## Structure
 

@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>{{.Title}}</title>
+    <title>{{index .Meta "title"}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="{{.Style}}" rel="stylesheet" type="text/css" />
 </head>
 <body>
     <ol>{{range .Tree}}
-        <li><a href="{{.URL}}">{{.Title}}</a></li>{{end}}
+        <li><a href="{{index .Meta "url"}}">{{index .Meta "title"}}</a></li>{{end}}
     </ol>
 </body>
 </html>

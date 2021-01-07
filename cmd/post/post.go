@@ -5,9 +5,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/chroma/formatters/html"
 	mathjax "github.com/litao91/goldmark-mathjax"
+	"github.com/rs/zerolog/log"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	meta "github.com/yuin/goldmark-meta"
@@ -19,8 +21,8 @@ import (
 // Poster builds a post
 type Poster interface {
 	Post(t *template.Template, fp Paths, md goldmark.Markdown) Poster
-	ParseMetadata(items yaml.MapSlice)
 	GetPath() string
+	GetMeta() map[string]string
 }
 
 // Paths represent path that changes between an original post and a converted one
@@ -84,4 +86,28 @@ func LoadTemplates(dir string) (*template.Template, error) {
 func PathConvert(p string, fp Paths) string {
 	filepath := p[len(fp.Old):]
 	return path.Join(fp.New, filepath)
+}
+
+// ParseMetadata modifies the article with the metadata contained in the mapslice
+// You can initialise the metadata inside the poster and every part of it
+// found in the file will be replaced if the keys match
+// The keys are checked lowercase so make sure your map keys are lowercase or
+// they will never match
+func ParseMetadata(p Poster, items yaml.MapSlice) map[string]string {
+	Meta := p.GetMeta()
+
+	for _, m := range items {
+		key, okK := m.Key.(string)
+		value, okV := m.Value.(string)
+
+		if _, ok := Meta[strings.ToLower(key)]; !okK || !okV || !ok {
+			log.Warn().Str("key", key).Msg("unknown metadata argument")
+			continue
+		}
+
+		Meta[strings.ToLower(key)] = value
+		log.Trace().Str("key", key).Str("value", value).Msg("parsing metadata")
+	}
+
+	return Meta
 }

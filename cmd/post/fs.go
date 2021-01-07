@@ -47,13 +47,25 @@ func (f *Folder) walker() (*Folder, error) {
 // It's returned as a relative path from the root when you created
 // The folder `f`
 func (f *Folder) Flatten() (files []string) {
-	if f.Files != nil {
-		files = append(files, f.Files...)
+	for _, fold := range f.Folders {
+		files = append(files, fold.Flatten()...)
 	}
+	return append(files, f.Files...)
+}
 
-	if f.Files != nil {
-		for _, fold := range f.Folders {
-			files = append(files, fold.Flatten()...)
+// FilterFunc represent a filter
+// When true it means it matches the filter
+type FilterFunc func(string) bool
+
+// FlattenFilter flattens the directory,
+// but only returns the files that match the filter
+func (f *Folder) FlattenFilter(filter FilterFunc) (files []string) {
+	for _, fold := range f.Folders {
+		files = append(files, fold.FlattenFilter(filter)...)
+	}
+	for _, file := range f.Files {
+		if filter(file) {
+			files = append(files, file)
 		}
 	}
 	return files
