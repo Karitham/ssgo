@@ -1,5 +1,7 @@
 # ⚠️ SSGO REWRITE ⚠️
 
+![logo](https://repository-images.githubusercontent.com/302272024/fe8b4500-5147-11eb-9f76-59c0e3450dd5)
+
 Very small static site generator.
 
 Rewrite happening, this means a few things:
