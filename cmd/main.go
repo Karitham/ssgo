@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Karitham/ssgo/cfg"
 	"github.com/Karitham/ssgo/post"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -14,72 +15,91 @@ import (
 )
 
 func main() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	conf := cfg.New()
 
-	t, err := post.LoadTemplates("../assets/templates")
+	// Configure logger
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Level(conf.Level)
+
+	md := post.NewMarkdown()
+	tmpl, err := post.LoadTemplates(conf.TmplPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not load templates")
 	}
 
-	md := post.NewMarkdown()
-	style := "../assets/css/post.css"
-	prefix := "_"
-	paths := post.Paths{
-		Old: "../posts",
-		New: "../public",
-	}
-
-	folder, err := post.Walker(paths.Old)
+	// Get the fs from the postPath
+	folder, err := post.Walker(conf.PostPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not walk post files")
 	}
 
-	buildRecursive(t, paths, md, prefix, folder, string(style))
+	buildRecursive(conf, tmpl, md, folder)
 }
 
-func buildRecursive(t *template.Template, paths post.Paths, md goldmark.Markdown, prefix string, folder *post.Folder, ArtStyle string) {
+func buildRecursive(conf *cfg.Global, tmpl *template.Template, md goldmark.Markdown, folder *post.Folder) {
 	if folder.Files == nil {
 		return
 	}
-	log.Debug().Strs("files", folder.Files).Msg("files to convert")
+	log.Debug().Strs("files", folder.Files).Msg("Files found")
 
 	// Recursive calling for each directory
 	wg := new(sync.WaitGroup)
 	for i := range folder.Folders {
 		wg.Add(1)
-		go func(f post.Folder) {
-			buildRecursive(t, paths, md, prefix, &f, ArtStyle)
+		go func(folder post.Folder) {
+			buildRecursive(conf, tmpl, md, &folder)
 			wg.Done()
 		}(folder.Folders[i])
 	}
 	wg.Wait()
 
-	// TODO : take care of the _index.md files so metadata is read correctly
+	// Check if there's an _index.md file
+	if index := Filtrer(func(f string) bool { return filepath.Base(f) == "_index.md" }, folder.Files...); len(index) == 1 {
+		log.Debug().Str("filepath", index[0]).Msg("Found index")
+		folder.Path = index[0]
+	}
+
 	// Default index
 	i := post.Index{
 		Filepath: folder.Path,
-		Style:    ArtStyle,
+		Style:    conf.Index.Style,
 		Tree:     make([]post.Article, 0, len(folder.Files)),
 		Meta: map[string]string{
 			"title":       "",
 			"description": "",
 			"date":        "",
-			"image":       "",
+			"background":  "",
 			"icon":        "",
 		},
 	}
 
 	// Default article
 	art := post.Article{
-		Style: ArtStyle,
+		Style: conf.Article.Style,
 	}
 
 	// Run the poster
 	i.Run(
-		folder.FlattenFilter(func(path string) bool { return !strings.HasPrefix(filepath.Base(path), prefix) }),
+		// Files but filtered on _
+		Filtrer(
+			func(path string) bool {
+				return !strings.HasPrefix(filepath.Base(path), conf.DraftPrefix)
+			},
+			folder.Files...,
+		),
 		art,
-		t,
-		paths,
+		tmpl,
 		md,
+		conf.Post,
 	)
+}
+
+// Filtrer applies a filterFunc on an input
+func Filtrer(filter func(string) bool, input ...string) (filtered []string) {
+	for _, inp := range input {
+		if filter(inp) {
+			filtered = append(filtered, inp)
+		}
+	}
+	return filtered
 }

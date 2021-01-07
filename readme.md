@@ -4,11 +4,26 @@ Very small static site generator.
 
 ## Changelog
 
-- Added a function to be able to filter files while flattening (which is super cool I love the impl)
-- Use a Map for metadata
-  - Made the metadata parsing generic to any `Poster`
-- Implemented a better version of the Runner
-- Fixed a data race
+- Added a Filtrer func functional style
+- Simplify a few method / func signatures
+- Implement a config package
+- Fix the making of index files
+
+## TODO
+
+- Server
+  - Live reload
+  - File watcher
+- Configuration
+  - Loading from file
+  - CLI
+- Upgrade Poster interface
+- Use metadata maps more efficiently
+- Fix indexes
+  - Preview of the content
+  - Tags / metadata display
+  - Ability to move to the next index
+- Work on CSS
 
 ## Structure
 

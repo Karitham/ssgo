@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/Karitham/ssgo/cfg"
 	"github.com/rs/zerolog/log"
 	"github.com/yuin/goldmark"
 	meta "github.com/yuin/goldmark-meta"
@@ -47,7 +48,7 @@ func (i *Index) Post(t *template.Template, fp Paths, md goldmark.Markdown) Poste
 	}
 
 	// Create the HTML file
-	file, err := os.Create(filepath.Join((PathConvert(i.Filepath, fp)), "index.html"))
+	file, err := os.Create(filepath.Join(filepath.Dir((PathConvert(i.Filepath, fp))), "index.html"))
 	if err != nil {
 		log.Error().Err(err).Str("filepath", i.Filepath).Msg("error creating file")
 		return nil
@@ -72,17 +73,22 @@ func (i *Index) Post(t *template.Template, fp Paths, md goldmark.Markdown) Poste
 		return nil
 	}
 
-	log.Info().Str("filepath", i.Filepath).Msg("built index")
+	log.Info().Str("filepath", i.Filepath).Msg("Built index")
 	return i
 }
 
 // Run builds each file then builds up the index
-func (i *Index) Run(files []string, artTemplate Article, t *template.Template, paths Paths, md goldmark.Markdown) {
+func (i *Index) Run(files []string, artTemplate Article, t *template.Template, md goldmark.Markdown, conf cfg.Post) {
 	wg := new(sync.WaitGroup)
 	mu := new(sync.Mutex)
+	paths := Paths{
+		Old: conf.PostPath,
+		New: conf.PublPath,
+	}
 
 	for _, file := range files {
 		wg.Add(1)
+
 		// Rebuild the article
 		go func(file string) {
 			art := artTemplate

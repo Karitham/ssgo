@@ -64,6 +64,6 @@ func (art *Article) Post(t *template.Template, fp Paths, md goldmark.Markdown) P
 		log.Err(err).Str("filepath", file.Name()).Msgf("article: %v", art)
 	}
 
-	log.Info().Str("file", art.Filepath).Msg("Converted article")
+	log.Info().Str("filepath", art.Filepath).Msg("Converted article")
 	return art
 }

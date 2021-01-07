@@ -106,7 +106,7 @@ func ParseMetadata(p Poster, items yaml.MapSlice) map[string]string {
 		}
 
 		Meta[strings.ToLower(key)] = value
-		log.Trace().Str("key", key).Str("value", value).Msg("parsing metadata")
+		log.Trace().Str("key", key).Str("value", value).Str("filepath", p.GetPath()).Msg("parsing metadata")
 	}
 
 	return Meta
