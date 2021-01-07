@@ -16,7 +16,7 @@ jobs:
               uses: actions/checkout@v2
 
             - name: Build
-              run: go build -v
+              run: go build cmd/main.go
 
     golangci:
         name: lint
@@ -27,3 +27,4 @@ jobs:
               uses: golangci/golangci-lint-action@v1
               with:
                   version: v1.29
+                  working-directory: cmd
