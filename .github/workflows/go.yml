@@ -23,8 +23,11 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
+
             - name: golangci-lint
               uses: golangci/golangci-lint-action@v1
+              env: 
+                ACTIONS_ALLOW_UNSECURE_COMMANDS: true
               with:
-                  version: v1.29
-                  working-directory: cmd
+                version: v1.30
+                working-directory: cmd
