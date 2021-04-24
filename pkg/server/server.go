@@ -10,8 +10,8 @@ import (
 
 	"github.com/Karitham/ssgo/pkg/config"
 	"github.com/Karitham/ssgo/pkg/post"
+	"github.com/fsnotify/fsnotify"
 	"github.com/jaschaephraim/lrserver"
-	"gopkg.in/fsnotify.v1"
 )
 
 // Serve ...

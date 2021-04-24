@@ -1,12 +1,10 @@
-# SSGO
+# SSGO -- Broken
 
 Very small static site generator.
 
-It currently support folder structures, but the navigation is not optimal
-
 I am focused on making the thing work right now, don't use this in prod
 
-* [SSGO](#ssgo)
+* [SSGO -- Broken](#ssgo----broken)
   * [Installing](#installing)
   * [Usage](#usage)
   * [Structure](#structure)
