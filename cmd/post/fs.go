@@ -14,7 +14,9 @@ type Folder struct {
 
 // Walker walks the file system starting from the root
 // and returns all the files
-// and directories it can find
+// and directories it can find.
+// The files have the full path to access
+// them but are respectively in subdirectories
 func Walker(root string) (*Folder, error) {
 	return (&Folder{Path: root}).walker()
 }
@@ -27,10 +29,10 @@ func (f *Folder) walker() (*Folder, error) {
 	}
 
 	for _, e := range currentDir {
-		fp := filepath.ToSlash(filepath.Join(f.Path, e.Name())) // Clean the filepath
+		fp := filepath.Join(f.Path, e.Name())
 
 		if e.IsDir() {
-			f.Folders = append(f.Folders, Folder{Path: fp})
+			f.Folders = append(f.Folders, Folder{Path: filepath.Join(f.Path, fp)})
 			if _, err := f.Folders[len(f.Folders)-1].walker(); err != nil {
 				return nil, err
 			}
@@ -47,26 +49,21 @@ func (f *Folder) walker() (*Folder, error) {
 // It's returned as a relative path from the root when you created
 // The folder `f`
 func (f *Folder) Flatten() (files []string) {
-	for _, fold := range f.Folders {
-		files = append(files, fold.Flatten()...)
-	}
-	return append(files, f.Files...)
+	return f.FlattenFilter(func(s string) bool { return true })
 }
 
-// FilterFunc represent a filter
-// When true it means it matches the filter
-type FilterFunc func(string) bool
-
 // FlattenFilter flattens the directory,
-// but only returns the files that match the filter
-func (f *Folder) FlattenFilter(filter FilterFunc) (files []string) {
-	for _, fold := range f.Folders {
-		files = append(files, fold.FlattenFilter(filter)...)
-	}
+// but only returns the files that matches the filter.
+// The order isn't guaranteed but should be in depth order,
+// the closer being first and later being last.
+func (f *Folder) FlattenFilter(filter func(string) bool) (files []string) {
 	for _, file := range f.Files {
 		if filter(file) {
 			files = append(files, file)
 		}
+	}
+	for _, fold := range f.Folders {
+		files = append(files, fold.FlattenFilter(filter)...)
 	}
 	return files
 }

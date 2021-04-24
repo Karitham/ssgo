@@ -1,10 +1,8 @@
 package post
 
 import (
-	"bytes"
 	"html/template"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"sync"
 
@@ -36,36 +34,33 @@ func (i *Index) GetMeta() map[string]string {
 // Post builds an HTML index
 func (i *Index) Post(t *template.Template, fp Paths, md goldmark.Markdown) Poster {
 	// Read the md file if it exists
-	var content []byte
-
 	if filepath.Ext(i.Filepath) == ".md" {
-		var err error
-		content, err = ioutil.ReadFile(i.Filepath)
+		content, err := ioutil.ReadFile(i.Filepath)
 		if err != nil {
-			log.Error().Err(err).Str("filepath", i.Filepath).Msg("error reading file")
+			log.Error().Err(err).Str("filepath", i.Filepath).Msg("error opening file")
 			return nil
 		}
+
+		context := parser.NewContext()
+		// Get the metadata contained in the file if there is some,
+
+		if err := md.Convert(content, nil, parser.WithContext(context)); err != nil {
+			log.Err(err).Str("filepath", i.Filepath).Str("content", string(content)).Msg("error converting file")
+			return nil
+		}
+		// Get the index metadata
+		i.Meta = ParseMetadata(i, meta.GetItems(context))
 	}
 
-	// Create the HTML file
-	file, err := os.Create(filepath.Join(filepath.Dir((PathConvert(i.Filepath, fp))), "index.html"))
+	i.Filepath = filepath.Join(filepath.Dir(i.Filepath), "index.html")
+
+	file, err := MakeHTMLFile(i, fp)
 	if err != nil {
-		log.Error().Err(err).Str("filepath", i.Filepath).Msg("error creating file")
+		log.Err(err).Str("filepath", i.Filepath).Msg("error creating file")
 		return nil
 	}
+
 	defer file.Close()
-
-	context := parser.NewContext()
-	// Get the metadata contained in the file if there is some,
-	// the buffer will be emptied
-	// so we can build the body
-	if err := md.Convert(content, bytes.NewBuffer(content), parser.WithContext(context)); err != nil {
-		log.Err(err).Str("filepath", i.Filepath).Str("content", string(content)).Msg("error converting file")
-		return nil
-	}
-
-	// Get the index metadata
-	i.Meta = ParseMetadata(i, meta.GetItems(context))
 
 	// Run the template building in the html file
 	if err := t.ExecuteTemplate(file, "index.tmpl", i); err != nil {
@@ -78,7 +73,7 @@ func (i *Index) Post(t *template.Template, fp Paths, md goldmark.Markdown) Poste
 }
 
 // Run builds each file then builds up the index
-func (i *Index) Run(files []string, artTemplate Article, t *template.Template, md goldmark.Markdown, conf cfg.Post) {
+func (i *Index) Run(files []string, artTemplate Article, t *template.Template, md goldmark.Markdown, conf cfg.Post) *Index {
 	wg := new(sync.WaitGroup)
 	mu := new(sync.Mutex)
 	paths := Paths{
@@ -93,14 +88,9 @@ func (i *Index) Run(files []string, artTemplate Article, t *template.Template, m
 		go func(file string) {
 			art := artTemplate
 			art.Filepath = file
-			art.Meta = map[string]string{
-				"description": "",
-				"date":        "",
-				"background":  "",
-				"icon":        "",
-				"title":       ConvertExt(filepath.Base(file), ""),
-				"url":         filepath.Base(ConvertExt(filepath.Base(file), ".html")),
-			}
+			art.Meta = NewMetaMap(conf.Article.Meta)
+			art.Meta["title"] = ConvertExt(filepath.Base(file), "")
+			art.Meta["url"] = filepath.Base(ConvertExt(filepath.Base(file), ".html"))
 
 			if art, ok := art.Post(t, paths, md).(*Article); ok {
 				mu.Lock()
@@ -113,5 +103,5 @@ func (i *Index) Run(files []string, artTemplate Article, t *template.Template, m
 	}
 	wg.Wait()
 
-	i.Post(t, paths, md)
+	return i.Post(t, paths, md).(*Index)
 }

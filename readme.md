@@ -21,6 +21,7 @@ If anybody sees this and has any suggestion, please open an issue.
 
 ### TODO
 
+- [ ]  Write Tests
 - [ ]  Server
   - [ ]  Live reload
     - [ ]  Use of Watcher to re generate the files and indexes
@@ -35,7 +36,7 @@ If anybody sees this and has any suggestion, please open an issue.
   - [ ]  Tags / metadata display
   - [ ]  Date use ?
   - [ ]  Ability to move to the next index
-- [ ]  Work on CSS (devide Index & Article)
+- [ ]  Work on CSS (divide Index & Article)
 
 ### DONE
 
@@ -53,7 +54,7 @@ If anybody sees this and has any suggestion, please open an issue.
 ### Maybe
 
 - Use a CSS Framework
-- Improve the fs package and release as seperate
+- Improve the fs package and release as separate
 
 ## Structure
 

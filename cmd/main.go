@@ -19,16 +19,16 @@ func main() {
 
 	// Configure logger
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	log.Logger = log.Level(conf.Level)
+	log.Logger = log.Level(conf.Logging.Level)
 
 	md := post.NewMarkdown()
-	tmpl, err := post.LoadTemplates(conf.TmplPath)
+	tmpl, err := post.LoadTemplates(conf.Post.TmplPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not load templates")
 	}
 
 	// Get the fs from the postPath
-	folder, err := post.Walker(conf.PostPath)
+	folder, err := post.Walker(conf.Post.PostPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not walk post files")
 	}
@@ -36,11 +36,19 @@ func main() {
 	buildRecursive(conf, tmpl, md, folder)
 }
 
-func buildRecursive(conf *cfg.Global, tmpl *template.Template, md goldmark.Markdown, folder *post.Folder) {
+func buildRecursive(conf *cfg.Global, tmpl *template.Template, md goldmark.Markdown, folder *post.Folder) *post.Index {
 	if folder.Files == nil {
-		return
+		return nil
 	}
 	log.Debug().Strs("files", folder.Files).Msg("Files found")
+
+	// Default index
+	i := post.Index{
+		Filepath: folder.Path,
+		Style:    conf.Post.Index.Style,
+		Meta:     post.NewMetaMap(conf.Post.Index.Meta),
+		Tree:     make([]post.Article, 0, len(folder.Files)),
+	}
 
 	// Recursive calling for each directory
 	wg := new(sync.WaitGroup)
@@ -59,31 +67,21 @@ func buildRecursive(conf *cfg.Global, tmpl *template.Template, md goldmark.Markd
 		folder.Path = index[0]
 	}
 
-	// Default index
-	i := post.Index{
-		Filepath: folder.Path,
-		Style:    conf.Index.Style,
-		Tree:     make([]post.Article, 0, len(folder.Files)),
-		Meta: map[string]string{
-			"title":       "",
-			"description": "",
-			"date":        "",
-			"background":  "",
-			"icon":        "",
-		},
-	}
-
 	// Default article
 	art := post.Article{
-		Style: conf.Article.Style,
+		Style: conf.Post.Article.Style,
+	}
+
+	for _, f := range folder.Folders {
+		i.Tree = append(i.Tree, post.Article{Meta: map[string]string{"title": f.Path, "url": f.Path}})
 	}
 
 	// Run the poster
-	i.Run(
-		// Files but filtered on _
+	return i.Run(
+		// Files but filtered on the specified prefix
 		Filtrer(
 			func(path string) bool {
-				return !strings.HasPrefix(filepath.Base(path), conf.DraftPrefix)
+				return !strings.HasPrefix(filepath.Base(path), conf.Post.DraftPrefix)
 			},
 			folder.Files...,
 		),

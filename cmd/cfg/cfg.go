@@ -1,12 +1,14 @@
 package cfg
 
-import "github.com/rs/zerolog"
+import (
+	"github.com/rs/zerolog"
+)
 
 // Global represents the global struct
 type Global struct {
-	Server
-	Post
-	Logging
+	Server  Server
+	Post    Post
+	Logging Logging
 }
 
 // Logging configures the logger
@@ -65,10 +67,18 @@ func New() *Global {
 			},
 			Article: Article{
 				Style: "/assets/css/post.css",
+				Meta: map[string]string{
+					"description": "",
+					"date":        "",
+					"background":  "",
+					"icon":        "",
+					"title":       "",
+					"url":         "",
+				},
 			},
 		},
 		Logging: Logging{
-			Level: zerolog.InfoLevel,
+			Level: zerolog.DebugLevel,
 		},
 	}
 }
